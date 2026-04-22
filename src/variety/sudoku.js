@@ -1,6 +1,117 @@
 //
 // パズル固有スクリプト部 数独版 sudoku.js
 //
+
+function sudoku_rejectInput(cell, prevNum) {
+	cell.setNum(prevNum);
+	cell.draw();
+	cell.seterr(1);
+	cell.draw();
+	setTimeout(function() {
+		cell.seterr(0);
+		cell.draw();
+	}, 600);
+}
+
+function sudoku_canPlace(bd, cell, digit) {
+	var bx = cell.bx, by = cell.by;
+	var cols = bd.cols, rows = bd.rows;
+
+	for (var c = 0; c < cols; c++) {
+		var cx = 2 * c + 1;
+		if (cx === bx) { continue; }
+		var rc = bd.getc(cx, by);
+		if (!rc.isnull && (rc.getNum() === digit || rc.qnum === digit)) { return false; }
+	}
+
+	for (var r = 0; r < rows; r++) {
+		var cy = 2 * r + 1;
+		if (cy === by) { continue; }
+		var rc2 = bd.getc(bx, cy);
+		if (!rc2.isnull && (rc2.getNum() === digit || rc2.qnum === digit)) { return false; }
+	}
+
+	/* 3x3 box uniqueness */
+	var boxSize = (Math.sqrt(cols) | 0);
+	var col0 = (((bx - 1) / 2) | 0);
+	var row0 = (((by - 1) / 2) | 0);
+	var br = Math.floor(row0 / boxSize) * boxSize;
+	var bc = Math.floor(col0 / boxSize) * boxSize;
+	for (var rr = br; rr < br + boxSize; rr++) {
+		for (var cc = bc; cc < bc + boxSize; cc++) {
+			var bbx = 2 * cc + 1, bby = 2 * rr + 1;
+			if (bbx === bx && bby === by) { continue; }
+			var rc3 = bd.getc(bbx, bby);
+			if (!rc3.isnull && (rc3.getNum() === digit || rc3.qnum === digit)) { return false; }
+		}
+	}
+	return true;
+}
+
+function sudoku_onlyMatchingParityRemains(puzzle) {
+	var bd = puzzle.board;
+	var lastOdd = puzzle._lastDigitOdd;
+	for (var i = 0; i < bd.cell.length; i++) {
+		var cell = bd.cell[i];
+		if (cell.qnum > 0) { continue; }
+		if (cell.getNum() > 0) { continue; }
+		for (var d = 1; d <= 9; d++) {
+			var dOdd = (d % 2 === 1);
+			if (dOdd === lastOdd) { continue; }
+			if (sudoku_canPlace(bd, cell, d)) { return false; }
+		}
+	}
+	return true;
+}
+
+function sudoku_isDigitParityAllowed(puzzle, newNum) {
+	if (typeof puzzle._lastDigitOdd === "undefined") { return true; }
+	var newIsOdd = (newNum % 2 === 1);
+	if (newIsOdd !== puzzle._lastDigitOdd) { return true; }
+	/* Deadlock bypass: allow same parity if no empty cell can accept
+	   an opposite-parity digit via standard row/col/box constraints */
+	return sudoku_onlyMatchingParityRemains(puzzle);
+}
+
+function sudoku_hashClues(bd) {
+	var h = 0;
+	for (var i = 0; i < bd.cell.length; i++) {
+		var q = bd.cell[i].qnum;
+		if (q > 0) { h = (h * 31 + q + i) | 0; }
+	}
+	return Math.abs(h);
+}
+
+function sudoku_getKillerCage(bd) {
+	if (bd._killerCage) { return bd._killerCage; }
+
+	var h = sudoku_hashClues(bd);
+	var boxIndex = h % 9;
+	var boxRow = Math.floor(boxIndex / 3);
+	var boxCol = boxIndex % 3;
+
+	var startRow = boxRow * 3;
+	var startCol = boxCol * 3;
+
+	var cells = [];
+	for (var r = startRow; r < startRow + 3; r++) {
+		for (var c = startCol; c < startCol + 3; c++) {
+			var bx = 2 * c + 1;
+			var by = 2 * r + 1;
+			cells.push({ bx: bx, by: by, row: r, col: c });
+		}
+	}
+
+	bd._killerCage = {
+		startRow: startRow,
+		startCol: startCol,
+		targetSum: 45,
+		cells: cells
+	};
+	return bd._killerCage;
+}
+
+
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
 		module.exports = [pidlist, classbase];
@@ -13,14 +124,60 @@
 	MouseEvent: {
 		inputModes: { edit: ["number", "clear"], play: ["number", "clear"] },
 		autoedit_func: "qnum",
-		autoplay_func: "qnum"
+		autoplay_func: "qnum",
+
+		inputqnum_main: function(cell) {
+			var puzzle = this.puzzle;
+			var prevNum = cell.getNum();
+
+			this.common.inputqnum_main.call(this, cell);
+
+			if (puzzle.playmode) {
+				var newNum = cell.getNum();
+				if (newNum > 0) {
+					if (puzzle._lastEnteredNum === newNum) {
+						sudoku_rejectInput(cell, prevNum);
+						return;
+					}
+					if (!sudoku_isDigitParityAllowed(puzzle, newNum)) {
+						sudoku_rejectInput(cell, prevNum);
+						return;
+					}
+					puzzle._lastEnteredNum = newNum;
+					puzzle._lastDigitOdd = (newNum % 2 === 1);
+				}
+			}
+		}
 	},
 
 	//---------------------------------------------------------
 	// キーボード入力系
 	KeyEvent: {
 		enablemake: true,
-		enableplay: true
+		enableplay: true,
+
+		key_inputqnum_main: function(cell, ca) {
+			var puzzle = this.puzzle;
+			var prevNum = cell.getNum();
+
+			this.common.key_inputqnum_main.call(this, cell, ca);
+
+			if (puzzle.playmode) {
+				var newNum = cell.getNum();
+				if (newNum > 0) {
+					if (puzzle._lastEnteredNum === newNum) {
+						sudoku_rejectInput(cell, prevNum);
+						return;
+					}
+					if (!sudoku_isDigitParityAllowed(puzzle, newNum)) {
+						sudoku_rejectInput(cell, prevNum);
+						return;
+					}
+					puzzle._lastEnteredNum = newNum;
+					puzzle._lastDigitOdd = (newNum % 2 === 1);
+				}
+			}
+		}
 	},
 
 	//---------------------------------------------------------
@@ -53,6 +210,8 @@
 				}
 			}
 			this.rebuildInfo();
+
+			this._killerCage = null;
 		}
 	},
 
@@ -69,13 +228,74 @@
 			this.drawGrid();
 			this.drawBorders();
 
+			this.drawKillerCage();
+
 			this.drawSubNumbers();
 			this.drawAnsNumbers();
 			this.drawQuesNumbers();
 
+			this.drawKillerCageSum();
+
 			this.drawChassis();
 
 			this.drawCursor();
+		},
+
+		drawKillerCage: function() {
+			var bd = this.board;
+			var cage = sudoku_getKillerCage(bd);
+			if (!cage) { return; }
+
+			var g = this.vinc("killer_cage", "crispEdges", true);
+
+			var bw = this.bw;
+			var bh = this.bh;
+			var tlbx = cage.cells[0].bx;
+			var tlby = cage.cells[0].by;
+			var brbx = cage.cells[8].bx;
+			var brby = cage.cells[8].by;
+
+			// bx*bw = cell center; (bx-1)*bw = left edge; (bx+1)*bw = right edge
+			var inset = Math.max(bw * 0.12, 1);
+			var px1 = (tlbx - 1) * bw + inset;
+			var py1 = (tlby - 1) * bh + inset;
+			var px2 = (brbx + 1) * bw - inset;
+			var py2 = (brby + 1) * bh - inset;
+
+			var lw = Math.max((this.cw / 16) | 0, 2);
+			var dash = [Math.max(this.cw / 5, 3), Math.max(this.cw / 8, 2)];
+
+			g.strokeStyle = "rgb(200, 60, 60)";
+			g.lineWidth = lw;
+
+			g.vid = "kcage_top";
+			g.strokeDashedLine(px1, py1, px2, py1, dash);
+			g.vid = "kcage_bot";
+			g.strokeDashedLine(px1, py2, px2, py2, dash);
+			g.vid = "kcage_lft";
+			g.strokeDashedLine(px1, py1, px1, py2, dash);
+			g.vid = "kcage_rgt";
+			g.strokeDashedLine(px2, py1, px2, py2, dash);
+		},
+
+		drawKillerCageSum: function() {
+			var bd = this.board;
+			var cage = sudoku_getKillerCage(bd);
+			if (!cage) { return; }
+
+			var g = this.vinc("killer_sum", "auto");
+			g.vid = "kcage_sum_text";
+
+			var bw = this.bw;
+			var bh = this.bh;
+			var px = cage.cells[0].bx * bw;
+			var py = cage.cells[0].by * bh;
+
+			this.disptext("" + cage.targetSum, px, py, {
+				position: 5,
+				ratio: 0.3,
+				color: "rgb(200, 60, 60)"
+			});
 		}
 	},
 
@@ -134,7 +354,40 @@
 		checklist: [
 			"checkDifferentNumberInRoom",
 			"checkDifferentNumberInLine",
+			"checkKillerCageSum",
 			"checkNoNumCell+"
-		]
+		],
+
+		checkKillerCageSum: function() {
+			var bd = this.board;
+			var cage = sudoku_getKillerCage(bd);
+			if (!cage) { return; }
+
+			var sum = 0;
+			var incomplete = false;
+			var cellObjs = [];
+			for (var i = 0; i < cage.cells.length; i++) {
+				var ci = cage.cells[i];
+				var cell = bd.getc(ci.bx, ci.by);
+				if (cell.isnull) { continue; }
+				cellObjs.push(cell);
+				var num = cell.getNum();
+				if (num > 0) {
+					sum += num;
+				} else {
+					incomplete = true;
+				}
+			}
+
+			if (incomplete) { return; }
+
+			if (sum !== cage.targetSum) {
+				this.failcode.add("bkSumNe");
+				if (this.checkOnly) { return; }
+				for (var j = 0; j < cellObjs.length; j++) {
+					cellObjs[j].seterr(1);
+				}
+			}
+		}
 	}
 });

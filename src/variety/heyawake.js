@@ -7,6 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
+
 })(["heyawake", "ayeheya", "oneroom", "akichi", "sumiwake"], {
 	//---------------------------------------------------------
 	// マウス入力系
@@ -18,7 +19,38 @@
 			play: ["shade", "unshade", "peke", "info-blk"]
 		},
 		autoedit_func: "areanum",
-		autoplay_func: "cellpeke"
+		autoplay_func: "cellpeke",
+
+		inputcell: function() {
+			var cell = this.getcell();
+			if (cell.isnull) { this.common.inputcell.call(this); return; }
+
+			var puzzle = this.puzzle;
+			if (puzzle.playmode) {
+				var wasShaded = cell.isShade();
+				this.common.inputcell.call(this);
+				var nowShaded = cell.isShade();
+
+				if (!wasShaded && nowShaded) {
+					var room = cell.room;
+					var lastRoom = puzzle._lastShadedRoom;
+					if (lastRoom && room === lastRoom) {
+						cell.setQans(0);
+						cell.draw();
+						cell.seterr(1);
+						cell.draw();
+						setTimeout(function() {
+							cell.seterr(0);
+							cell.draw();
+						}, 600);
+						return;
+					}
+					puzzle._lastShadedRoom = room;
+				}
+			} else {
+				this.common.inputcell.call(this);
+			}
+		}
 	},
 	"MouseEvent@sumiwake": {
 		inputModes: {
@@ -97,7 +129,12 @@
 		maxnum: 2
 	},
 	Board: {
-		hasborder: 1
+		hasborder: 1,
+
+		initBoardSize: function(col, row) {
+			this.common.initBoardSize.call(this, col, row);
+			this._lastShadedRoom = null;
+		}
 	},
 	"Board@sumiwake": {
 		hascross: 2
@@ -513,8 +550,59 @@
 			"checkOneDoor@oneroom",
 			"checkCountinuousUnshadeCell@!oneroom",
 			"checkRoomSymm@ayeheya",
+			"checkRowShadeBalance",
 			"doneShadingDecided"
 		],
+
+		checkAdjacentShadeCell: function() {
+			var bd = this.board;
+			var pairCount = 0;
+			var errCells = [];
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				var cell2 = cell.adjacent.right;
+				if (cell.bx < bd.maxbx - 1 && cell.isShade() && cell2.isShade()) {
+					pairCount++;
+					errCells.push(cell, cell2);
+				}
+				cell2 = cell.adjacent.bottom;
+				if (cell.by < bd.maxby - 1 && cell.isShade() && cell2.isShade()) {
+					pairCount++;
+					errCells.push(cell, cell2);
+				}
+			}
+			if (pairCount > 1) {
+				this.failcode.add("csAdjacentGt1");
+				if (this.checkOnly) { return; }
+				for (var i = 0; i < errCells.length; i++) {
+					errCells[i].seterr(1);
+				}
+			}
+		},
+
+		checkRowShadeBalance: function() {
+			var bd = this.board;
+			var maxPerRow = Math.ceil(bd.cols / 2);
+			for (var r = 0; r < bd.rows; r++) {
+				var by = 2 * r + 1;
+				var count = 0;
+				var rowCells = [];
+				for (var c = 0; c < bd.cols; c++) {
+					var cell = bd.getc(2 * c + 1, by);
+					if (!cell.isnull) {
+						rowCells.push(cell);
+						if (cell.isShade()) { count++; }
+					}
+				}
+				if (count > maxPerRow) {
+					this.failcode.add("csRowBalance");
+					if (this.checkOnly) { return; }
+					for (var j = 0; j < rowCells.length; j++) {
+						if (rowCells[j].isShade()) { rowCells[j].seterr(1); }
+					}
+				}
+			}
+		},
 
 		checkFractal: function() {
 			var rooms = this.board.roommgr.components;
