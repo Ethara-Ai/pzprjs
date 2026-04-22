@@ -265,6 +265,9 @@
 			"checkOverShadeCellInArea",
 			"checkSeqBlocksInRoom",
 			"checkTetromino",
+			"checkShadeLimitPerRow",
+			"checkShadeLimitPerCol",
+			"checkAllThreeShapes",
 			"checkConnectShade",
 			"checkNoShadeCellInArea@lits",
 			"checkLessShadeCellInArea"
@@ -303,6 +306,65 @@
 				},
 				"bkShadeLt4"
 			);
+		},
+
+		// Extra Rule 1: Max 3 shaded cells per row
+		checkShadeLimitPerRow: function() {
+			var result = true, bd = this.board;
+			for (var by = 1; by <= bd.maxby; by += 2) {
+				var clist = bd.cellinside(bd.minbx + 1, by, bd.maxbx - 1, by);
+				var count = 0;
+				for (var i = 0; i < clist.length; i++) {
+					if (clist[i].isShade()) { count++; }
+				}
+				if (count > 3) {
+					result = false;
+					if (this.checkOnly) { break; }
+					clist.seterr(1);
+				}
+			}
+			if (!result) {
+				this.failcode.add("csRowShadeLimit");
+			}
+		},
+
+		// Extra Rule 2: Max 3 shaded cells per column
+		checkShadeLimitPerCol: function() {
+			var result = true, bd = this.board;
+			for (var bx = 1; bx <= bd.maxbx; bx += 2) {
+				var clist = bd.cellinside(bx, bd.minby + 1, bx, bd.maxby - 1);
+				var count = 0;
+				for (var i = 0; i < clist.length; i++) {
+					if (clist[i].isShade()) { count++; }
+				}
+				if (count > 3) {
+					result = false;
+					if (this.checkOnly) { break; }
+					clist.seterr(1);
+				}
+			}
+			if (!result) {
+				this.failcode.add("csColShadeLimit");
+			}
+		},
+
+		checkAllThreeShapes: function() {
+			var bd = this.board;
+			var rooms = bd.roommgr.components;
+			var shapes = {};
+			for (var r = 0; r < rooms.length; r++) {
+				var clist = rooms[r].clist;
+				for (var i = 0; i < clist.length; i++) {
+					if (clist[i].tetro !== null && clist[i].tetro.shape !== null) {
+						shapes[clist[i].tetro.shape] = true;
+						break;
+					}
+				}
+			}
+			var count = Object.keys(shapes).length;
+			if (count < 3) {
+				this.failcode.add("csNotAllShapes");
+			}
 		}
 	},
 	"AnsCheck@invlitso": {

@@ -253,10 +253,53 @@
 		checklist: [
 			"checkShadeCellExist",
 			"checkAdjacentShadeCell",
+			"checkDiagonalShadeCell",
+			"checkCheckerboardParity",
+			"checkShadeLimitPerLine",
 			"checkConnectUnshadeRB",
 			"checkRowsColsSameQuesNumber",
 			"doneShadingDecided"
 		],
+
+		checkDiagonalShadeCell: function() {
+			this.checkAroundCell(function(cell1, cell2) {
+				return cell1.isShade() && cell2.isShade();
+			}, "csDiagonal");
+		},
+
+		checkCheckerboardParity: function() {
+			var result = true, bd = this.board;
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				if (cell.isShade()) {
+					var row0 = (cell.by - 1) / 2;
+					var col0 = (cell.bx - 1) / 2;
+					if ((row0 + col0) % 2 !== 0) {
+						result = false;
+						if (this.checkOnly) { break; }
+						cell.seterr(1);
+					}
+				}
+			}
+			if (!result) {
+				this.failcode.add("csParityBad");
+			}
+		},
+
+		checkShadeLimitPerLine: function() {
+			this.checkRowsCols(this.isShadeLimitOk, "csShadeLimit");
+		},
+		isShadeLimitOk: function(clist) {
+			var count = 0;
+			for (var i = 0; i < clist.length; i++) {
+				if (clist[i].isShade()) { count++; }
+			}
+			if (count > 2) {
+				clist.seterr(1);
+				return false;
+			}
+			return true;
+		},
 
 		checkRowsColsSameQuesNumber: function() {
 			this.checkRowsCols(this.isDifferentNumberInClist_hitori, "nmDupRow");
