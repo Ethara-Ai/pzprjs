@@ -126,81 +126,34 @@
 			var d = this.viewRange();
 			this.puzzle.painter.paintRange(
 				d.x1 - 1,
-				this.by - 1,
-				d.x2 + 1,
-				this.by + 1
-			);
-			this.puzzle.painter.paintRange(
-				this.bx - 1,
 				d.y1 - 1,
-				this.bx + 1,
+				d.x2 + 1,
 				d.y2 + 1
 			);
 		},
 
 		akariRangeClist: function() {
-			var cell,
-				clist = new this.klass.CellList(),
-				adc = this.adjacent;
+			var clist = new this.klass.CellList(),
+				bd = this.board;
 
-			clist.add(this);
-			cell = adc.left;
-			while (!cell.isnull && cell.qnum === -1) {
-				clist.add(cell);
-				cell = cell.adjacent.left;
-			}
-			cell = adc.right;
-			while (!cell.isnull && cell.qnum === -1) {
-				clist.add(cell);
-				cell = cell.adjacent.right;
-			}
-			cell = adc.top;
-			while (!cell.isnull && cell.qnum === -1) {
-				clist.add(cell);
-				cell = cell.adjacent.top;
-			}
-			cell = adc.bottom;
-			while (!cell.isnull && cell.qnum === -1) {
-				clist.add(cell);
-				cell = cell.adjacent.bottom;
+			/* 3×3 box centered on this cell (skip walls) */
+			for (var dy = -2; dy <= 2; dy += 2) {
+				for (var dx = -2; dx <= 2; dx += 2) {
+					var cell2 = bd.getc(this.bx + dx, this.by + dy);
+					if (!cell2.isnull && cell2.qnum === -1) {
+						clist.add(cell2);
+					}
+				}
 			}
 			return clist;
 		},
 		viewRange: function() {
-			var cell,
-				cell2,
-				d = {},
-				adc = this.adjacent;
-
-			cell = this;
-			cell2 = adc.left;
-			while (!cell2.isnull && cell2.qnum === -1) {
-				cell = cell2;
-				cell2 = cell.adjacent.left;
-			}
-			d.x1 = cell.bx;
-			cell = this;
-			cell2 = adc.right;
-			while (!cell2.isnull && cell2.qnum === -1) {
-				cell = cell2;
-				cell2 = cell.adjacent.right;
-			}
-			d.x2 = cell.bx;
-			cell = this;
-			cell2 = adc.top;
-			while (!cell2.isnull && cell2.qnum === -1) {
-				cell = cell2;
-				cell2 = cell.adjacent.top;
-			}
-			d.y1 = cell.by;
-			cell = this;
-			cell2 = adc.bottom;
-			while (!cell2.isnull && cell2.qnum === -1) {
-				cell = cell2;
-				cell2 = cell.adjacent.bottom;
-			}
-			d.y2 = cell.by;
-			return d;
+			return {
+				x1: this.bx - 2,
+				x2: this.bx + 2,
+				y1: this.by - 2,
+				y2: this.by + 2
+			};
 		}
 	},
 
@@ -397,7 +350,7 @@
 	//---------------------------------------------------------
 	// 正解判定処理実行部
 	AnsCheck: {
-		checklist: ["checkNotDuplicateAkari", "checkDir4Akari", "checkShinedCell"],
+		checklist: ["checkDir4Akari", "checkShinedCell"],
 
 		checkDir4Akari: function() {
 			this.checkDir4Cell(
@@ -412,26 +365,6 @@
 			this.checkAllCell(function(cell) {
 				return cell.noNum() && cell.qlight !== 1;
 			}, "ceDark");
-		},
-
-		checkNotDuplicateAkari: function() {
-			this.checkRowsColsPartly(
-				this.isPluralAkari,
-				function(cell) {
-					return cell.isNum();
-				},
-				"akariDup"
-			);
-		},
-		isPluralAkari: function(clist) {
-			var akaris = clist.filter(function(cell) {
-				return cell.isAkari();
-			});
-			var result = akaris.length <= 1;
-			if (!result) {
-				akaris.seterr(4);
-			}
-			return result;
 		}
 	}
 });
