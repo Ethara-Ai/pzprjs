@@ -238,6 +238,33 @@ div#btnarea {
   margin: 1em auto 1em auto;
 }
 
+/* ルールパネル (Rules panel below buttons) */
+div#rulespanel {
+  position: relative;
+  margin: 0.5em auto 1em auto;
+  padding: 10px 16px;
+  max-width: 480px;
+  text-align: left;
+  font-size: 0.9em;
+  line-height: 1.6;
+  background: #f8f8f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+div#rulespanel h3 {
+  margin: 0 0 6px 0;
+  font-size: 1em;
+  text-align: center;
+  color: #333;
+}
+div#rulespanel ol {
+  margin: 0;
+  padding-left: 1.4em;
+}
+div#rulespanel ol li {
+  margin-bottom: 4px;
+}
+
 /* OK/Cancel表示用 */
 div#notifies {
   position: absolute;

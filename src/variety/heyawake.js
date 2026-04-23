@@ -8,7 +8,7 @@
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
 
-})(["heyawake", "ayeheya", "oneroom", "akichi", "sumiwake"], {
+})(["heyawake", "ayeheya", "oneroom", "akichi", "sumiwake", "heyawake2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -19,8 +19,9 @@
 			play: ["shade", "unshade", "peke", "info-blk"]
 		},
 		autoedit_func: "areanum",
-		autoplay_func: "cellpeke",
-
+		autoplay_func: "cellpeke"
+	},
+	"MouseEvent@heyawake": {
 		inputcell: function() {
 			var cell = this.getcell();
 			if (cell.isnull) { this.common.inputcell.call(this); return; }
@@ -46,6 +47,39 @@
 						return;
 					}
 					puzzle._lastShadedRoom = room;
+				}
+			} else {
+				this.common.inputcell.call(this);
+			}
+		}
+	},
+	"MouseEvent@heyawake2": {
+		inputcell: function() {
+			var cell = this.getcell();
+			if (cell.isnull) { this.common.inputcell.call(this); return; }
+
+			var puzzle = this.puzzle;
+			if (puzzle.playmode) {
+				var wasShaded = cell.isShade();
+				this.common.inputcell.call(this);
+				var nowShaded = cell.isShade();
+
+				if (!wasShaded && nowShaded) {
+					var col = ((cell.bx - 1) / 2) | 0;
+					var half = (col < (puzzle.board.cols / 2)) ? "left" : "right";
+					var lastHalf = puzzle._lastShadeHalf;
+					if (lastHalf && half === lastHalf) {
+						cell.setQans(0);
+						cell.draw();
+						cell.seterr(1);
+						cell.draw();
+						setTimeout(function() {
+							cell.seterr(0);
+							cell.draw();
+						}, 600);
+						return;
+					}
+					puzzle._lastShadeHalf = half;
 				}
 			} else {
 				this.common.inputcell.call(this);
@@ -537,7 +571,8 @@
 	AnsCheck: {
 		checklist: [
 			"checkShadeCellExist",
-			"checkAdjacentShadeCell",
+			"checkAdjacentShadeCell@heyawake",
+			"checkStrictAdjacentShadeCell@heyawake2",
 			"checkConnectUnshadeRB",
 			"checkRegionDivided@oneroom",
 			"checkFractal@ayeheya",
@@ -550,7 +585,9 @@
 			"checkOneDoor@oneroom",
 			"checkCountinuousUnshadeCell@!oneroom",
 			"checkRoomSymm@ayeheya",
-			"checkRowShadeBalance",
+			"checkRowShadeBalance@heyawake",
+			"checkColShadeBalance@heyawake2",
+			"checkShadeDensity@heyawake2",
 			"doneShadingDecided"
 		],
 
@@ -580,6 +617,27 @@
 			}
 		},
 
+		checkStrictAdjacentShadeCell: function() {
+			var bd = this.board;
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				var cell2 = cell.adjacent.right;
+				if (cell.bx < bd.maxbx - 1 && cell.isShade() && cell2.isShade()) {
+					this.failcode.add("csAdjacent");
+					if (this.checkOnly) { return; }
+					cell.seterr(1);
+					cell2.seterr(1);
+				}
+				cell2 = cell.adjacent.bottom;
+				if (cell.by < bd.maxby - 1 && cell.isShade() && cell2.isShade()) {
+					this.failcode.add("csAdjacent");
+					if (this.checkOnly) { return; }
+					cell.seterr(1);
+					cell2.seterr(1);
+				}
+			}
+		},
+
 		checkRowShadeBalance: function() {
 			var bd = this.board;
 			var maxPerRow = Math.ceil(bd.cols / 2);
@@ -600,6 +658,48 @@
 					for (var j = 0; j < rowCells.length; j++) {
 						if (rowCells[j].isShade()) { rowCells[j].seterr(1); }
 					}
+				}
+			}
+		},
+
+		checkColShadeBalance: function() {
+			var bd = this.board;
+			var maxPerCol = Math.ceil(bd.rows / 2);
+			for (var c = 0; c < bd.cols; c++) {
+				var bx = 2 * c + 1;
+				var count = 0;
+				var colCells = [];
+				for (var r = 0; r < bd.rows; r++) {
+					var cell = bd.getc(bx, 2 * r + 1);
+					if (!cell.isnull) {
+						colCells.push(cell);
+						if (cell.isShade()) { count++; }
+					}
+				}
+				if (count > maxPerCol) {
+					this.failcode.add("csColBalance");
+					if (this.checkOnly) { return; }
+					for (var j = 0; j < colCells.length; j++) {
+						if (colCells[j].isShade()) { colCells[j].seterr(1); }
+					}
+				}
+			}
+		},
+
+		checkShadeDensity: function() {
+			var bd = this.board;
+			var total = bd.cell.length;
+			var shadeCount = 0;
+			for (var i = 0; i < total; i++) {
+				if (bd.cell[i].isShade()) { shadeCount++; }
+			}
+			var minShade = Math.ceil(total * 0.10);
+			var maxShade = Math.floor(total * 0.50);
+			if (shadeCount < minShade || shadeCount > maxShade) {
+				this.failcode.add("csDensityBad");
+				if (this.checkOnly) { return; }
+				for (var j = 0; j < total; j++) {
+					if (bd.cell[j].isShade()) { bd.cell[j].seterr(1); }
 				}
 			}
 		},

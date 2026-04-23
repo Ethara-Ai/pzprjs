@@ -2,6 +2,7 @@
 // パズル固有スクリプト部 数独版 sudoku.js
 //
 
+/* ---- shared helpers ---- */
 function sudoku_rejectInput(cell, prevNum) {
 	cell.setNum(prevNum);
 	cell.draw();
@@ -13,6 +14,7 @@ function sudoku_rejectInput(cell, prevNum) {
 	}, 600);
 }
 
+/* ---- sudoku1 helpers ---- */
 function sudoku_canPlace(bd, cell, digit) {
 	var bx = cell.bx, by = cell.by;
 	var cols = bd.cols, rows = bd.rows;
@@ -68,8 +70,6 @@ function sudoku_isDigitParityAllowed(puzzle, newNum) {
 	if (typeof puzzle._lastDigitOdd === "undefined") { return true; }
 	var newIsOdd = (newNum % 2 === 1);
 	if (newIsOdd !== puzzle._lastDigitOdd) { return true; }
-	/* Deadlock bypass: allow same parity if no empty cell can accept
-	   an opposite-parity digit via standard row/col/box constraints */
 	return sudoku_onlyMatchingParityRemains(puzzle);
 }
 
@@ -111,6 +111,72 @@ function sudoku_getKillerCage(bd) {
 	return bd._killerCage;
 }
 
+/* ---- sudoku2 helpers ---- */
+function sudoku2_getCellRow(cell) {
+	return ((cell.by - 1) / 2) | 0;
+}
+
+function sudoku2_getCellBox(cell) {
+	var col = ((cell.bx - 1) / 2) | 0;
+	var row = ((cell.by - 1) / 2) | 0;
+	return Math.floor(row / 3) * 3 + Math.floor(col / 3);
+}
+
+function sudoku2_onlyMatchingRowRemains(puzzle) {
+	var bd = puzzle.board;
+	var lastRow = puzzle._lastEnteredRow;
+	for (var i = 0; i < bd.cell.length; i++) {
+		var cell = bd.cell[i];
+		if (cell.qnum > 0) { continue; }
+		if (cell.getNum() > 0) { continue; }
+		var r = sudoku2_getCellRow(cell);
+		if (r !== lastRow) { return false; }
+	}
+	return true;
+}
+
+function sudoku2_onlyMatchingBoxRemains(puzzle) {
+	var bd = puzzle.board;
+	var lastBox = puzzle._lastEnteredBox;
+	for (var i = 0; i < bd.cell.length; i++) {
+		var cell = bd.cell[i];
+		if (cell.qnum > 0) { continue; }
+		if (cell.getNum() > 0) { continue; }
+		var b = sudoku2_getCellBox(cell);
+		if (b !== lastBox) { return false; }
+	}
+	return true;
+}
+
+/* sudoku2 input check: row alternation + box alternation */
+function sudoku2_checkInput(puzzle, cell, prevNum) {
+	var newRow = sudoku2_getCellRow(cell);
+	var newBox = sudoku2_getCellBox(cell);
+
+	/* Rule 6: Row alternation */
+	if (typeof puzzle._lastEnteredRow !== "undefined" && newRow === puzzle._lastEnteredRow) {
+		if (!sudoku2_onlyMatchingRowRemains(puzzle)) {
+			sudoku_rejectInput(cell, prevNum);
+			return false;
+		}
+	}
+
+	/* Rule 7: Box alternation */
+	if (typeof puzzle._lastEnteredBox !== "undefined" && newBox === puzzle._lastEnteredBox) {
+		if (!sudoku2_onlyMatchingBoxRemains(puzzle)) {
+			sudoku_rejectInput(cell, prevNum);
+			return false;
+		}
+	}
+
+	puzzle._lastEnteredRow = newRow;
+	puzzle._lastEnteredBox = newBox;
+	return true;
+}
+
+/* sudoku2: get a hash-chosen diagonal (main or anti) */
+
+
 
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
@@ -118,14 +184,17 @@ function sudoku_getKillerCage(bd) {
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["sudoku"], {
+})(["sudoku", "sudoku2"], {
 	//---------------------------------------------------------
-	// マウス入力系
+	// マウス入力系 (shared base)
 	MouseEvent: {
 		inputModes: { edit: ["number", "clear"], play: ["number", "clear"] },
 		autoedit_func: "qnum",
-		autoplay_func: "qnum",
+		autoplay_func: "qnum"
+	},
 
+	/* sudoku1: same-digit rejection + digit parity alternation */
+	"MouseEvent@sudoku": {
 		inputqnum_main: function(cell) {
 			var puzzle = this.puzzle;
 			var prevNum = cell.getNum();
@@ -150,12 +219,34 @@ function sudoku_getKillerCage(bd) {
 		}
 	},
 
+	/* sudoku2: row alternation + box alternation */
+	"MouseEvent@sudoku2": {
+		inputqnum_main: function(cell) {
+			var puzzle = this.puzzle;
+			var prevNum = cell.getNum();
+
+			this.common.inputqnum_main.call(this, cell);
+
+			if (puzzle.playmode) {
+				var newNum = cell.getNum();
+				if (newNum > 0) {
+					if (!sudoku2_checkInput(puzzle, cell, prevNum)) {
+						return;
+					}
+				}
+			}
+		}
+	},
+
 	//---------------------------------------------------------
-	// キーボード入力系
+	// キーボード入力系 (shared base)
 	KeyEvent: {
 		enablemake: true,
-		enableplay: true,
+		enableplay: true
+	},
 
+	/* sudoku1: same-digit rejection + digit parity alternation */
+	"KeyEvent@sudoku": {
 		key_inputqnum_main: function(cell, ca) {
 			var puzzle = this.puzzle;
 			var prevNum = cell.getNum();
@@ -175,6 +266,25 @@ function sudoku_getKillerCage(bd) {
 					}
 					puzzle._lastEnteredNum = newNum;
 					puzzle._lastDigitOdd = (newNum % 2 === 1);
+				}
+			}
+		}
+	},
+
+	/* sudoku2: row alternation + box alternation */
+	"KeyEvent@sudoku2": {
+		key_inputqnum_main: function(cell, ca) {
+			var puzzle = this.puzzle;
+			var prevNum = cell.getNum();
+
+			this.common.key_inputqnum_main.call(this, cell, ca);
+
+			if (puzzle.playmode) {
+				var newNum = cell.getNum();
+				if (newNum > 0) {
+					if (!sudoku2_checkInput(puzzle, cell, prevNum)) {
+						return;
+					}
 				}
 			}
 		}
@@ -220,8 +330,26 @@ function sudoku_getKillerCage(bd) {
 	},
 
 	//---------------------------------------------------------
-	// 画像表示系
+	// 画像表示系 (shared base — minimal)
 	Graphic: {
+		paint: function() {
+			this.drawBGCells();
+			this.drawTargetSubNumber();
+			this.drawGrid();
+			this.drawBorders();
+
+			this.drawSubNumbers();
+			this.drawAnsNumbers();
+			this.drawQuesNumbers();
+
+			this.drawChassis();
+
+			this.drawCursor();
+		}
+	},
+
+	/* sudoku1: killer cage rendering */
+	"Graphic@sudoku": {
 		paint: function() {
 			this.drawBGCells();
 			this.drawTargetSubNumber();
@@ -255,7 +383,6 @@ function sudoku_getKillerCage(bd) {
 			var brbx = cage.cells[8].bx;
 			var brby = cage.cells[8].by;
 
-			// bx*bw = cell center; (bx-1)*bw = left edge; (bx+1)*bw = right edge
 			var inset = Math.max(bw * 0.12, 1);
 			var px1 = (tlbx - 1) * bw + inset;
 			var py1 = (tlby - 1) * bh + inset;
@@ -350,14 +477,17 @@ function sudoku_getKillerCage(bd) {
 
 	//---------------------------------------------------------
 	// 正解判定処理実行部
-	AnsCheck: {
+
+	/* sudoku1: standard + killer cage */
+	"AnsCheck@sudoku#1": {
 		checklist: [
 			"checkDifferentNumberInRoom",
 			"checkDifferentNumberInLine",
 			"checkKillerCageSum",
 			"checkNoNumCell+"
-		],
-
+		]
+	},
+	"AnsCheck@sudoku": {
 		checkKillerCageSum: function() {
 			var bd = this.board;
 			var cage = sudoku_getKillerCage(bd);
@@ -386,6 +516,39 @@ function sudoku_getKillerCage(bd) {
 				if (this.checkOnly) { return; }
 				for (var j = 0; j < cellObjs.length; j++) {
 					cellObjs[j].seterr(1);
+				}
+			}
+		}
+	},
+
+	/* sudoku2: standard checks + even-digit balance */
+	"AnsCheck@sudoku2#1": {
+		checklist: [
+			"checkDifferentNumberInRoom",
+			"checkDifferentNumberInLine",
+			"checkEvenDigitBalance",
+			"checkNoNumCell+"
+		]
+	},
+	"AnsCheck@sudoku2": {
+		checkEvenDigitBalance: function() {
+			var bd = this.board;
+			for (var r = 0; r < bd.rows; r++) {
+				var evenCount = 0;
+				var rowCells = [];
+				for (var c = 0; c < bd.cols; c++) {
+					var cell = bd.getc(c * 2 + 1, r * 2 + 1);
+					rowCells.push(cell);
+					var num = cell.getNum();
+					if (num > 0 && num % 2 === 0) { evenCount++; }
+				}
+				if (evenCount !== 4) {
+					this.failcode.add("nmEvenBalance");
+					if (this.checkOnly) { return; }
+					for (var i = 0; i < rowCells.length; i++) {
+						rowCells[i].seterr(1);
+					}
+					return;
 				}
 			}
 		}
