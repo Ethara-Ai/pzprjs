@@ -125,10 +125,22 @@
 				variant: true,
 				volatile: true
 			}); /* pentopia: Allow shading clues */
-			this.add("yajilin_out", false, {
-				variant: true,
-				volatile: true
-			}); /* yajilin: All shaded cells are outside the loop */
+		this.add("lits_no_sameshape", false, {
+			variant: true,
+			volatile: true
+		}); /* lits: Disable same-shape adjacency ban */
+		this.add("yajilin_out", false, {
+			variant: true,
+			volatile: true
+		}); /* yajilin: All shaded cells are outside the loop */
+		this.add("yajilin_diagonal", false, {
+			variant: true,
+			volatile: true
+		}); /* yajilin: No diagonally adjacent shaded cells */
+		this.add("yajilin_maxshade", 0, {
+			variant: true,
+			volatile: true
+		}); /* yajilin: Max shaded cells per row/column (0=disabled) */
 			this.add("koburin_minesweeper", false, {
 				variant: true,
 				volatile: true
@@ -509,16 +521,21 @@
 				case "fillomino_tri":
 					exec = pid === "fillomino";
 					break;
-				case "yajilin_out":
-					exec =
-						[
-							"yajilin",
-							"yajilin-regions",
-							"koburin",
-							"lixloop",
-							"retsurin"
-						].indexOf(pid) >= 0;
-					break;
+			case "lits_no_sameshape":
+				exec = pid === "lits";
+				break;
+			case "yajilin_out":
+			case "yajilin_diagonal":
+			case "yajilin_maxshade":
+				exec =
+					[
+						"yajilin",
+						"yajilin-regions",
+						"koburin",
+						"lixloop",
+						"retsurin"
+					].indexOf(pid) >= 0;
+				break;
 				case "slither_full":
 					exec =
 						[

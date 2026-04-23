@@ -627,6 +627,11 @@
 
 			this.puzzle.setConfig("yajilin_out", this.checkpflag("o"));
 			this.puzzle.setConfig("disptype_yajilin", !this.checkpflag("b") ? 1 : 2);
+			this.puzzle.setConfig("yajilin_diagonal", this.checkpflag("d"));
+			var mIdx = this.pflag ? this.pflag.indexOf("m") : -1;
+			if (mIdx >= 0 && this.pflag.length > mIdx + 1) {
+				this.puzzle.setConfig("yajilin_maxshade", parseInt(this.pflag[mIdx + 1], 36));
+			}
 		},
 		encodePzpr: function(type) {
 			this.encodeArrowNumber16();
@@ -634,6 +639,11 @@
 			var flags = "";
 			flags += this.puzzle.getConfig("yajilin_out") ? "o" : "";
 			flags += this.puzzle.getConfig("disptype_yajilin") === 2 ? "b" : "";
+			flags += this.puzzle.getConfig("yajilin_diagonal") ? "d" : "";
+			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
+			if (maxshade) {
+				flags += "m" + maxshade.toString(36);
+			}
 			this.outpflag = flags.length ? flags : null;
 		},
 
@@ -649,11 +659,23 @@
 			this.decodeBorder();
 			this.decodeRoomNumber16();
 			this.puzzle.setConfig("yajilin_out", this.checkpflag("o"));
+			this.puzzle.setConfig("yajilin_diagonal", this.checkpflag("d"));
+			var mIdx = this.pflag ? this.pflag.indexOf("m") : -1;
+			if (mIdx >= 0 && this.pflag.length > mIdx + 1) {
+				this.puzzle.setConfig("yajilin_maxshade", parseInt(this.pflag[mIdx + 1], 36));
+			}
 		},
 		encodePzpr: function(type) {
 			this.encodeBorder();
 			this.encodeRoomNumber16();
-			this.outpflag = this.puzzle.getConfig("yajilin_out") ? "o" : null;
+			var flags = "";
+			flags += this.puzzle.getConfig("yajilin_out") ? "o" : "";
+			flags += this.puzzle.getConfig("yajilin_diagonal") ? "d" : "";
+			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
+			if (maxshade) {
+				flags += "m" + maxshade.toString(36);
+			}
+			this.outpflag = flags.length ? flags : null;
 		}
 	},
 	"Encode@koburin": {
@@ -662,6 +684,11 @@
 			this.puzzle.setConfig("koburin_minesweeper", this.checkpflag("m"));
 			this.puzzle.setConfig("disptype_yajilin", !this.checkpflag("b") ? 1 : 2);
 			this.puzzle.setConfig("yajilin_out", this.checkpflag("o"));
+			this.puzzle.setConfig("yajilin_diagonal", this.checkpflag("d"));
+			var sIdx = this.pflag ? this.pflag.indexOf("s") : -1;
+			if (sIdx >= 0 && this.pflag.length > sIdx + 1) {
+				this.puzzle.setConfig("yajilin_maxshade", parseInt(this.pflag[sIdx + 1], 36));
+			}
 		},
 		encodePzpr: function(type) {
 			this.encode4Cell();
@@ -676,6 +703,13 @@
 			if (this.puzzle.getConfig("disptype_yajilin") === 2) {
 				flags += "b";
 			}
+			if (this.puzzle.getConfig("yajilin_diagonal")) {
+				flags += "d";
+			}
+			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
+			if (maxshade) {
+				flags += "s" + maxshade.toString(36);
+			}
 
 			this.outpflag = flags.length ? flags : null;
 		}
@@ -686,6 +720,11 @@
 
 			this.puzzle.setConfig("yajilin_out", this.checkpflag("o"));
 			this.puzzle.setConfig("disptype_yajilin", !this.checkpflag("b") ? 1 : 2);
+			this.puzzle.setConfig("yajilin_diagonal", this.checkpflag("d"));
+			var mIdx = this.pflag ? this.pflag.indexOf("m") : -1;
+			if (mIdx >= 0 && this.pflag.length > mIdx + 1) {
+				this.puzzle.setConfig("yajilin_maxshade", parseInt(this.pflag[mIdx + 1], 36));
+			}
 		},
 		encodePzpr: function(type) {
 			this.encodeNumber16();
@@ -693,6 +732,11 @@
 			var flags = "";
 			flags += this.puzzle.getConfig("yajilin_out") ? "o" : "";
 			flags += this.puzzle.getConfig("disptype_yajilin") === 2 ? "b" : "";
+			flags += this.puzzle.getConfig("yajilin_diagonal") ? "d" : "";
+			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
+			if (maxshade) {
+				flags += "m" + maxshade.toString(36);
+			}
 			this.outpflag = flags.length ? flags : null;
 		}
 	},
@@ -700,12 +744,16 @@
 	"FileIO@yajilin,lixloop": {
 		decodeData: function() {
 			this.decodeConfigFlag("o", "yajilin_out");
+			this.decodeConfigFlag("d", "yajilin_diagonal");
+			this.decodeConfigFlag("m", "yajilin_maxshade");
 			this.decodeCellDirecQnum();
 			this.decodeCellAns();
 			this.decodeBorderLine();
 		},
 		encodeData: function() {
 			this.encodeConfigFlag("o", "yajilin_out");
+			this.encodeConfigFlag("d", "yajilin_diagonal");
+			this.encodeConfigFlag("m", "yajilin_maxshade");
 			this.encodeCellDirecQnum();
 			this.encodeCellAns();
 			this.encodeBorderLine();
@@ -833,6 +881,8 @@
 	"FileIO@yajilin-regions": {
 		decodeData: function() {
 			this.decodeConfigFlag("o", "yajilin_out");
+			this.decodeConfigFlag("d", "yajilin_diagonal");
+			this.decodeConfigFlag("m", "yajilin_maxshade");
 			this.decodeAreaRoom();
 			this.decodeCellQnum();
 			this.decodeCellAns();
@@ -840,6 +890,8 @@
 		},
 		encodeData: function() {
 			this.encodeConfigFlag("o", "yajilin_out");
+			this.encodeConfigFlag("d", "yajilin_diagonal");
+			this.encodeConfigFlag("m", "yajilin_maxshade");
 			this.encodeAreaRoom();
 			this.encodeCellQnum();
 			this.encodeCellAns();
@@ -864,12 +916,16 @@
 			this.decodeConfigFlag("o", "yajilin_out");
 			this.decodeConfigFlag("m", "koburin_minesweeper");
 			this.decodeConfigFlag("b", "disptype_yajilin", 2, 1);
+			this.decodeConfigFlag("d", "yajilin_diagonal");
+			this.decodeConfigFlag("s", "yajilin_maxshade");
 		},
 
 		encodeConfig: function() {
 			this.encodeConfigFlag("o", "yajilin_out");
 			this.encodeConfigFlag("m", "koburin_minesweeper");
 			this.encodeConfigFlag("b", "disptype_yajilin", 2, 1);
+			this.encodeConfigFlag("d", "yajilin_diagonal");
+			this.encodeConfigFlag("s", "yajilin_maxshade");
 		}
 	},
 	//---------------------------------------------------------
@@ -880,6 +936,8 @@
 			"checkCrossLine",
 			"checkLineOnShadeCell",
 			"checkAdjacentShadeCell",
+			"checkDiagonalAdjacentShadeCell",
+			"checkMaxShadedRowCol",
 			"checkDeadendLine+",
 			"checkArrowNumber@yajilin,koburin,lixloop",
 			"checkShadeCellCount@yajilin-regions",
@@ -934,6 +992,49 @@
 			this.checkAllCell(function(cell) {
 				return cell.isShade() && bd.getx(cell.bx - 1, cell.by - 1).inside;
 			}, "shInside");
+		},
+
+		checkDiagonalAdjacentShadeCell: function() {
+			if (!this.puzzle.getConfig("yajilin_diagonal")) {
+				return;
+			}
+			this.checkAroundCell(function(cell1, cell2) {
+				return cell1.isShade() && cell2.isShade();
+			}, "csAdjDiag");
+		},
+
+		checkMaxShadedRowCol: function() {
+			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
+			if (!maxshade) {
+				return;
+			}
+
+			var bd = this.board;
+			var x = [],
+				y = [];
+			for (var i = bd.minbx; i <= bd.maxbx; i++) {
+				x[i] = 0;
+			}
+			for (var i = bd.minby; i <= bd.maxby; i++) {
+				y[i] = 0;
+			}
+			bd.cell.each(function(cell) {
+				if (cell.isShade()) {
+					x[cell.bx]++;
+					y[cell.by]++;
+				}
+			});
+
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				if (cell.isShade() && (x[cell.bx] > maxshade || y[cell.by] > maxshade)) {
+					this.failcode.add("shRowCol");
+					if (this.checkOnly) {
+						break;
+					}
+					cell.seterr(1);
+				}
+			}
 		}
 	},
 	"AnsCheck@retsurin": {
