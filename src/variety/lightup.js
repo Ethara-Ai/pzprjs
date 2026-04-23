@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["lightup"], {
+})(["lightup", "lightup2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -366,5 +366,13 @@
 				return cell.noNum() && cell.qlight !== 1;
 			}, "ceDark");
 		}
+	},
+
+	"Board@lightup2": {
+		customRules: [
+			"Diagonal illumination — lights shine along 4 diagonal rays until hitting a wall or edge (not orthogonal).",
+			"Diagonal wall counting — numbered walls count diagonally adjacent lights (not orthogonal neighbours).",
+			"No two bulbs orthogonally adjacent — lights cannot be placed in cells that share an edge."
+		]
 	}
 });

@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["lits", "norinori", "invlitso"], {
+})(["lits", "norinori", "invlitso", "lits2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {

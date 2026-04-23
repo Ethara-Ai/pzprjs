@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["tapa"], {
+})(["tapa", "tapa2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -452,5 +452,13 @@
 				return false;
 			}, "ceTapaNe");
 		}
+	},
+
+	"Board@tapa2": {
+		customRules: [
+			"No 2×2 fully shaded — four shaded cells may not form a 2×2 block (same as standard Tapa).",
+			"Shaded cells must be connected — all shaded cells form a single orthogonally connected group.",
+			"Column shaded majority — in each column, the number of shaded cells must exceed the number of unshaded cells."
+		]
 	}
 });

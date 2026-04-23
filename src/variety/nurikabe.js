@@ -16,7 +16,8 @@
 		"canal",
 		"norinuri",
 		"cornerch",
-		"hasunomura"
+		"hasunomura",
+		"nurikabe2"
 	],
 	{
 		//---------------------------------------------------------
@@ -679,6 +680,14 @@
 		},
 		"FailCode@cornerch": {
 			csDivide8: "csDivide8.mochikoro"
+		},
+
+		"Board@nurikabe2": {
+			customRules: [
+				"No 2×2 unshaded squares — four unshaded cells may not form a 2×2 block.",
+				"Shaded groups must be exactly 2 cells (dominoes) — every shaded region is a domino.",
+				"Connected-shade requirement removed — shaded cells do not need to be globally connected."
+			]
 		}
 	}
 );
