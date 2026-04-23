@@ -46,7 +46,8 @@ module.exports = function(grunt){
       p_en: grunt.file.readJSON("src-ui/res/p.en.json", 'utf-8'),
       p_ja: grunt.file.readJSON("src-ui/res/p.ja.json", 'utf-8'),
       failcode_en: grunt.file.readJSON("src/res/failcode.en.json", 'utf-8'),
-      failcode_ja: grunt.file.readJSON("src/res/failcode.ja.json", 'utf-8')
+      failcode_ja: grunt.file.readJSON("src/res/failcode.ja.json", 'utf-8'),
+      rules_en: rulesEN
     },
 
     copy: {

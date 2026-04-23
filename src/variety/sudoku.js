@@ -324,6 +324,20 @@ function sudoku2_checkInput(puzzle, cell, prevNum) {
 			this._killerCage = null;
 		}
 	},
+	"Board@sudoku": {
+		customRules: [
+			"No consecutive same number \u2014 you cannot enter the same digit twice in a row. Enter a different number first.",
+			"Digit parity alternation \u2014 you must alternate between odd and even digits, unless only same-parity empty cells remain.",
+			"Killer cage \u2014 a 3\u00d73 box is randomly chosen as a \"killer cage\" (drawn with dashed borders). All digits in that box must sum to 45."
+		]
+	},
+	"Board@sudoku2": {
+		customRules: [
+			"Row alternation \u2014 you cannot place in the same row consecutively, unless only that row has empty cells.",
+			"Box alternation \u2014 you cannot place in the same 3\u00d73 box consecutively, unless only that box has empty cells.",
+			"Even digit balance \u2014 each row must contain exactly 4 even digits (2, 4, 6, 8)."
+		]
+	},
 
 	AreaRoomGraph: {
 		enabled: true

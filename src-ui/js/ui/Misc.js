@@ -102,45 +102,45 @@ ui.misc = {
 		});
 	},
 
+	customGameRules: {},
+
 	displayRules: function() {
 		var el = _doc.getElementById("rulespanel");
 		if (!el) { return; }
 
 		var pid = ui.puzzle.pid;
-		var defaultRules = [
-			"Fill every empty cell with a digit from 1 to 9.",
-			"Each row must contain the digits 1–9 with no repeats.",
-			"Each column must contain the digits 1–9 with no repeats.",
-			"Each 3×3 box must contain the digits 1–9 with no repeats."
-		];
-		var customRules = {
-			sudoku: [
-				"No consecutive same number — you cannot enter the same digit twice in a row. Enter a different number first.",
-				"Digit parity alternation — you must alternate between odd and even digits, unless only same-parity empty cells remain.",
-				"Killer cage — a 3×3 box is randomly chosen as a \"killer cage\" (drawn with dashed borders). All digits in that box must sum to 45."
-			],
-			sudoku2: [
-				"Row alternation — you cannot place in the same row consecutively, unless only that row has empty cells.",
-				"Box alternation — you cannot place in the same 3×3 box consecutively, unless only that box has empty cells.",
-				"Even digit balance — each row must contain exactly 4 even digits (2, 4, 6, 8)."
-			]
-		};
+		var rulesText = ui.rulesData[pid];
+		var custom = ui.puzzle.board.customRules;
 
-		var custom = customRules[pid];
-		if (!custom) {
+		if (!rulesText && !custom) {
 			el.style.display = "none";
 			return;
 		}
 
-		var html = "<h3>Standard Rules</h3><ol>";
-		for (var i = 0; i < defaultRules.length; i++) {
-			html += "<li>" + defaultRules[i] + "</li>";
+		var html = "";
+
+		/* Standard rules from rules.en.yaml */
+		if (rulesText) {
+			html += "<h3>Rules</h3><ol>";
+			var lines = rulesText.split("\n");
+			for (var i = 0; i < lines.length; i++) {
+				var line = lines[i].replace(/^\d+\.\s*/, "").trim();
+				if (line.length > 0) {
+					html += "<li>" + line + "</li>";
+				}
+			}
+			html += "</ol>";
 		}
-		html += "</ol><h3>Custom Rules</h3><ol>";
-		for (var j = 0; j < custom.length; j++) {
-			html += "<li>" + custom[j] + "</li>";
+
+		/* Custom gameplay rules (for modified variants) */
+		if (custom) {
+			html += "<h3>Custom Rules</h3><ol>";
+			for (var j = 0; j < custom.length; j++) {
+				html += "<li>" + custom[j] + "</li>";
+			}
+			html += "</ol>";
 		}
-		html += "</ol>";
+
 		el.innerHTML = html;
 		el.style.display = "";
 	}

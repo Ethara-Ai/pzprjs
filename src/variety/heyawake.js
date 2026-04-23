@@ -170,6 +170,19 @@
 			this._lastShadedRoom = null;
 		}
 	},
+	"Board@heyawake": {
+		customRules: [
+			"No consecutive same-room shading \u2014 after shading a cell in a room, your next shade must be in a different room. Unshading does not trigger this rule.",
+			"Row shade balance \u2014 no single row can have more than \u2308cols/2\u2309 shaded cells."
+		]
+	},
+	"Board@heyawake2": {
+		customRules: [
+			"Half-grid alternation \u2014 you must alternate between shading cells in the left half and right half of the grid.",
+			"Column shade balance \u2014 no single column can have more than \u2308rows/2\u2309 shaded cells.",
+			"Shading density 10\u201350% \u2014 the total shaded cells must be at least 10% and at most 50% of the grid area."
+		]
+	},
 	"Board@sumiwake": {
 		hascross: 2
 	},

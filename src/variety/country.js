@@ -444,9 +444,24 @@
 		hasborder: 1
 	},
 	"Board@country,country2": {
-		initBoardSize: function() {
+		initBoardSize: function(col, row) {
+			this.common.initBoardSize.call(this, col, row);
 			this.puzzle._lastLineRoom = null;
 		}
+	},
+	"Board@country#rules": {
+		customRules: [
+			"No consecutive same-room lines \u2014 after drawing a line in a room, your next line must start in a different room.",
+			"Minimum loop coverage \u2014 at least 50% of all grid cells must be on the loop.",
+			"At most 1 empty row \u2014 at most one row may have zero cells on the loop."
+		]
+	},
+	"Board@country2#rules": {
+		customRules: [
+			"Turn balance \u2014 the total number of turns (corners) in the loop must not exceed twice the number of straight segments.",
+			"Maximum loop coverage \u2014 at most 85% of all grid cells may be on the loop.",
+			"At most 1 empty row \u2014 at most one row may have zero cells on the loop."
+		]
 	},
 	"Board@onsen,maxi,detour,remlen,wataridori": {
 		cols: 8,
