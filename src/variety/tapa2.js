@@ -1,5 +1,5 @@
 //
-// パズル固有スクリプト部 Tapa版 tapa.js
+// パズル固有スクリプト部 Tapa2版 tapa2.js
 //
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
@@ -7,9 +7,9 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["tapa"], {
+})(["tapa2"], {
 	//---------------------------------------------------------
-	// マウス入力系
+	// Mouse input
 	MouseEvent: {
 		use: true,
 		inputModes: {
@@ -79,7 +79,7 @@
 	},
 
 	//---------------------------------------------------------
-	// キーボード入力系
+	// Keyboard input
 	KeyEvent: {
 		enablemake: true,
 
@@ -89,7 +89,7 @@
 	},
 
 	//---------------------------------------------------------
-	// 盤面管理系
+	// Board management
 	Cell: {
 		minnum: 0,
 		maxnum: 8,
@@ -203,7 +203,7 @@
 	},
 
 	//---------------------------------------------------------
-	// 画像表示系
+	// Graphics
 	Graphic: {
 		irowakeblk: true,
 		qanscolor: "black",
@@ -225,7 +225,7 @@
 	},
 
 	//---------------------------------------------------------
-	// URLエンコード/デコード処理
+	// URL encode/decode
 	Encode: {
 		decodePzpr: function(type) {
 			this.decodeNumber_tapa();
@@ -398,20 +398,20 @@
 	},
 
 	//---------------------------------------------------------
-	// 正解判定処理実行部
+	// Answer checking
 	AnsCheck: {
 		checklist: [
 			"checkShadeCellExist+",
-			"check2x2UnshadeCell",
+			"check2x2ShadeCell",
 			"checkCountOfClueCell",
-			"checkShadeMajorityPerRow",
-			"checkConnectUnshade"
+			"checkShadeMajorityPerCol",
+			"checkConnectShade"
 		],
 
-		checkShadeMajorityPerRow: function() {
+		checkShadeMajorityPerCol: function() {
 			var bd = this.board;
-			for (var by = bd.minby + 1; by <= bd.maxby - 1; by += 2) {
-				var clist = bd.cellinside(bd.minbx + 1, by, bd.maxbx - 1, by);
+			for (var bx = bd.minbx + 1; bx <= bd.maxbx - 1; bx += 2) {
+				var clist = bd.cellinside(bx, bd.minby + 1, bx, bd.maxby - 1);
 				var shaded = 0;
 				for (var i = 0; i < clist.length; i++) {
 					if (clist[i].isShade()) {
@@ -419,7 +419,7 @@
 					}
 				}
 				if (shaded <= clist.length - shaded) {
-					this.failcode.add("csRowMinority");
+					this.failcode.add("csColMinority");
 					if (this.checkOnly) {
 						break;
 					}
@@ -430,11 +430,10 @@
 
 		checkCountOfClueCell: function() {
 			this.checkAllCell(function(cell) {
-				// trueになるマスがエラー扱い
 				if (cell.qnums.length === 0) {
 					return false;
 				}
-				var shades = cell.getShadedLength(); // 順番の考慮は不要
+				var shades = cell.getShadedLength();
 				if (cell.qnums.length !== shades.length) {
 					return true;
 				}
@@ -452,5 +451,14 @@
 				return false;
 			}, "ceTapaNe");
 		}
+	},
+
+	//---------------------------------------------------------
+	// Fail codes
+	FailCode: {
+		csColMinority: [
+			"A column does not have a shaded majority.",
+			"列の黒マスが過半数ではありません。"
+		]
 	}
 });
