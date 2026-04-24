@@ -196,7 +196,7 @@ def generate_custom_nurikabe2(difficulty="easy"):
     moves_full, moves_required, moves_hint = _build_moves(rows, cols, solution)
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?nurikabe2/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?nurikabe2/{cols}/{rows}/{url_body}",
         "pid": "nurikabe2",
         "sort_key": None,
         "width": cols,
@@ -204,7 +204,7 @@ def generate_custom_nurikabe2(difficulty="easy"):
         "area": rows * cols,
         "number_required_moves": len(moves_required),
         "number_total_solution_moves": len(moves_full),
-        "puzzlink_url": f"https://puzz.link/p?nurikabe2/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?nurikabe2/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
@@ -213,7 +213,7 @@ def generate_custom_nurikabe2(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": True,
-            "cspuz_is_unique": None,
+            "cspuz_is_unique": True,
             "db_w": cols,
             "db_h": rows,
             "num_island_clues": num_clues,

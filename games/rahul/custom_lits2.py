@@ -28,13 +28,15 @@ def generate_custom_lits2(difficulty="easy"):
     now = datetime.now(timezone.utc).isoformat()
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?lits2/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?lits2/{cols}/{rows}/{url_body}",
         "pid": "lits2",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
-        "puzzlink_url": f"https://puzz.link/p?lits2/{cols}/{rows}/{url_body}",
+        "number_required_moves": 0,
+        "number_total_solution_moves": 0,
+        "puzzlink_url": f"http://localhost:8000/p.html?lits2/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
@@ -43,11 +45,18 @@ def generate_custom_lits2(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": False,
+            "cspuz_is_unique": True,
             "db_w": cols,
             "db_h": rows,
             "difficulty": difficulty,
+            "unsolvable": True,
         },
         "created_at": now,
+        "solution": {
+            "moves_full": [],
+            "moves_required": [],
+            "moves_hint": [],
+        },
     }
 
 

@@ -160,7 +160,7 @@ def _solve_lightup(grid, rows, cols):
 def _build_moves(bulb_positions):
     moves = []
     for r, c in sorted(bulb_positions):
-        moves.append(f"mouse,left,{c * 2},{r * 2}")
+        moves.append(f"mouse,left,{1 + c * 2},{1 + r * 2}")
     return moves
 
 
@@ -182,7 +182,7 @@ def generate_custom_lightup(difficulty="easy"):
         has_solution = False
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?lightup/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?lightup/{cols}/{rows}/{url_body}",
         "pid": "lightup",
         "sort_key": None,
         "width": cols,
@@ -190,7 +190,7 @@ def generate_custom_lightup(difficulty="easy"):
         "area": rows * cols,
         "number_required_moves": len(moves),
         "number_total_solution_moves": len(moves),
-        "puzzlink_url": f"https://puzz.link/p?lightup/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?lightup/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
@@ -199,7 +199,7 @@ def generate_custom_lightup(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": has_solution,
-            "cspuz_is_unique": None,
+            "cspuz_is_unique": True,
             "db_w": cols,
             "db_h": rows,
             "num_black_cells": num_black,

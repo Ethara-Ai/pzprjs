@@ -223,7 +223,7 @@ def generate_custom_nurikabe(difficulty="easy"):
         has_solution = False
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?nurikabe/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?nurikabe/{cols}/{rows}/{url_body}",
         "pid": "nurikabe",
         "sort_key": None,
         "width": cols,
@@ -231,7 +231,7 @@ def generate_custom_nurikabe(difficulty="easy"):
         "area": rows * cols,
         "number_required_moves": len(moves_required),
         "number_total_solution_moves": len(moves_full),
-        "puzzlink_url": f"https://puzz.link/p?nurikabe/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?nurikabe/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
@@ -240,7 +240,7 @@ def generate_custom_nurikabe(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": has_solution,
-            "cspuz_is_unique": None,
+            "cspuz_is_unique": False if difficulty == "medium" else None,
             "db_w": cols,
             "db_h": rows,
             "num_island_clues": num_clues,

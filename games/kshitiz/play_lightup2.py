@@ -198,7 +198,7 @@ def generate_custom_lightup2(difficulty="easy"):
         has_solution = False
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?lightup2/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?lightup2/{cols}/{rows}/{url_body}",
         "pid": "lightup2",
         "sort_key": None,
         "width": cols,
@@ -206,7 +206,7 @@ def generate_custom_lightup2(difficulty="easy"):
         "area": rows * cols,
         "number_required_moves": len(moves),
         "number_total_solution_moves": len(moves),
-        "puzzlink_url": f"https://puzz.link/p?lightup2/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?lightup2/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,

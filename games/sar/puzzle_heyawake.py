@@ -16,6 +16,7 @@ _PUZZLES = {
             [10, 11, 11, 9, 9, 9, 9],
         ],
         "clues": {0: 1, 1: 2, 3: 1, 7: 3, 8: 1, 9: 3},
+        "shaded": [(0, 5), (1, 0), (1, 4), (2, 2), (2, 6), (3, 1), (3, 4), (4, 0), (4, 3), (5, 1), (5, 5), (6, 3), (6, 6)],
     },
     "medium": {
         "rows": 8, "cols": 10,
@@ -31,6 +32,7 @@ _PUZZLES = {
             [12, 12, 12, 14, 14, 13, 13, 13, 15, 15],
         ],
         "clues": {3: 0, 4: 2, 5: 2, 6: 2, 7: 3, 8: 3, 9: 2, 10: 3, 11: 2, 12: 1},
+        "shaded": [(0, 4), (1, 1), (1, 6), (2, 0), (2, 2), (2, 4), (2, 7), (2, 9), (3, 5), (3, 8), (4, 1), (4, 3), (4, 6), (5, 0), (5, 2), (5, 5), (5, 7), (5, 9), (6, 4), (6, 8), (7, 2), (7, 6)],
     },
     "hard": {
         "rows": 14, "cols": 24,
@@ -61,8 +63,44 @@ _PUZZLES = {
             31: 2, 32: 1, 33: 4, 34: 2, 35: 5, 37: 3, 38: 2,
             40: 0, 41: 1, 44: 3, 45: 1, 46: 1, 48: 0, 51: 3,
         },
+        "shaded": [
+            (0, 4), (0, 7), (0, 12), (0, 15), (0, 18),
+            (1, 1), (1, 3), (1, 5), (1, 8), (1, 10), (1, 14), (1, 16), (1, 20), (1, 22),
+            (2, 0), (2, 6), (2, 9), (2, 13), (2, 17), (2, 21),
+            (3, 1), (3, 7), (3, 11), (3, 14), (3, 20),
+            (4, 2), (4, 4), (4, 6), (4, 9), (4, 12), (4, 17), (4, 19), (4, 23),
+            (5, 1), (5, 5), (5, 8), (5, 10), (5, 13), (5, 15), (5, 18), (5, 22),
+            (6, 4), (6, 6), (6, 11), (6, 14), (6, 16), (6, 19), (6, 21),
+            (7, 0), (7, 3), (7, 8), (7, 12), (7, 17), (7, 20), (7, 23),
+            (8, 1), (8, 5), (8, 7), (8, 9), (8, 11), (8, 14), (8, 16), (8, 19), (8, 21),
+            (9, 2), (9, 6), (9, 10), (9, 12), (9, 15), (9, 18), (9, 22),
+            (10, 0), (10, 3), (10, 7), (10, 9), (10, 14), (10, 16), (10, 19),
+            (11, 4), (11, 6), (11, 12), (11, 17), (11, 20),
+            (12, 1), (12, 5), (12, 9), (12, 11), (12, 15), (12, 18), (12, 23),
+            (13, 2), (13, 7), (13, 10), (13, 14), (13, 17), (13, 21),
+        ],
     },
 }
+
+
+def _build_moves(rows, cols, shaded):
+    shaded_set = set(shaded)
+    moves_full = []
+    moves_required = []
+    moves_hint = []
+    for r in range(rows):
+        for c in range(cols):
+            x = 2 * c + 1
+            y = 2 * r + 1
+            if (r, c) in shaded_set:
+                move = f"mouse,left,{x},{y}"
+                moves_full.append(move)
+                moves_required.append(move)
+            else:
+                move = f"mouse,right,{x},{y}"
+                moves_full.append(move)
+                moves_hint.append(move)
+    return moves_full, moves_required, moves_hint
 
 
 def generate_puzzle_heyawake(level="easy"):
@@ -70,16 +108,18 @@ def generate_puzzle_heyawake(level="easy"):
     rows, cols = p["rows"], p["cols"]
     now = datetime.now(timezone.utc).isoformat()
 
+    moves_full, moves_required, moves_hint = _build_moves(rows, cols, p["shaded"])
+
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?heyawake/{cols}/{rows}/{p['url_body']}",
+        "puzzle_url": f"http://localhost:8000/p.html?heyawake/{cols}/{rows}/{p['url_body']}",
         "pid": "heyawake",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
-        "number_required_moves": 0,
-        "number_total_solution_moves": 0,
-        "puzzlink_url": f"https://puzz.link/p?heyawake/{cols}/{rows}/{p['url_body']}",
+        "number_required_moves": len(moves_required),
+        "number_total_solution_moves": len(moves_full),
+        "puzzlink_url": f"http://localhost:8000/p.html?heyawake/{cols}/{rows}/{p['url_body']}",
         "source": {
             "site_name": "ppbench_golden",
             "page_url": None,
@@ -97,9 +137,9 @@ def generate_puzzle_heyawake(level="easy"):
         },
         "created_at": now,
         "solution": {
-            "moves_full": [],
-            "moves_required": [],
-            "moves_hint": [],
+            "moves_full": moves_full,
+            "moves_required": moves_required,
+            "moves_hint": moves_hint,
         },
     }
 

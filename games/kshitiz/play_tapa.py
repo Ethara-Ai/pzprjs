@@ -271,15 +271,15 @@ def generate_custom_tapa(difficulty="easy"):
         moves = {"moves_full": [], "moves_required": [], "moves_hint": []}
 
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?tapa/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
         "pid": "tapa",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
-        "number_required_moves": len(moves["moves_required"]) if has_solution else None,
-        "number_total_solution_moves": len(moves["moves_full"]) if has_solution else None,
-        "puzzlink_url": f"https://puzz.link/p?tapa/{cols}/{rows}/{url_body}",
+        "number_required_moves": len(moves["moves_required"]),
+        "number_total_solution_moves": len(moves["moves_full"]),
+        "puzzlink_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
@@ -288,7 +288,7 @@ def generate_custom_tapa(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": has_solution,
-            "cspuz_is_unique": None,
+            "cspuz_is_unique": False,
             "db_w": cols,
             "db_h": rows,
             "num_clue_cells": num_clue_cells,

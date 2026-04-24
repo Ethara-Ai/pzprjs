@@ -16,6 +16,17 @@ _PUZZLES = {
             [9, 4, 3, 0, 0, 0, 8, 2, 6],
             [0, 2, 8, 0, 0, 0, 1, 4, 0],
         ],
+        "solution_grid": [
+            [4, 5, 9, 7, 8, 3, 6, 1, 2],
+            [1, 3, 6, 9, 5, 2, 4, 7, 8],
+            [2, 8, 7, 6, 1, 4, 3, 5, 9],
+            [8, 7, 4, 5, 3, 6, 2, 9, 1],
+            [3, 9, 5, 8, 2, 1, 7, 6, 4],
+            [6, 1, 2, 4, 9, 7, 5, 8, 3],
+            [7, 6, 1, 2, 4, 8, 9, 3, 5],
+            [9, 4, 3, 1, 7, 5, 8, 2, 6],
+            [5, 2, 8, 3, 6, 9, 1, 4, 7],
+        ],
     },
     "medium": {
         "url_body": "1o6h84k76h9j64i7h4k8h8i53j5h71k14h6o2",
@@ -29,6 +40,17 @@ _PUZZLES = {
             [0, 0, 5, 0, 0, 7, 1, 0, 0],
             [0, 0, 0, 1, 4, 0, 0, 6, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 2],
+        ],
+        "solution_grid": [
+            [1, 5, 8, 7, 9, 2, 4, 3, 6],
+            [9, 6, 3, 5, 8, 4, 2, 1, 7],
+            [4, 2, 7, 6, 3, 1, 9, 5, 8],
+            [2, 3, 6, 4, 1, 8, 5, 7, 9],
+            [5, 4, 9, 2, 7, 3, 6, 8, 1],
+            [7, 8, 1, 9, 6, 5, 3, 2, 4],
+            [6, 9, 5, 8, 2, 7, 1, 4, 3],
+            [3, 7, 2, 1, 4, 9, 8, 6, 5],
+            [8, 1, 4, 3, 5, 6, 7, 9, 2],
         ],
     },
     "hard": {
@@ -44,26 +66,51 @@ _PUZZLES = {
             [0, 4, 5, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 7, 8, 0, 0],
         ],
+        "solution_grid": [
+            [2, 6, 7, 5, 3, 9, 4, 1, 8],
+            [4, 1, 9, 8, 7, 6, 2, 3, 5],
+            [8, 5, 3, 1, 4, 2, 6, 9, 7],
+            [9, 8, 4, 2, 6, 5, 3, 7, 1],
+            [7, 3, 1, 4, 9, 8, 5, 6, 2],
+            [5, 2, 6, 7, 1, 3, 9, 8, 4],
+            [6, 7, 8, 9, 2, 4, 1, 5, 3],
+            [3, 4, 5, 6, 8, 1, 7, 2, 9],
+            [1, 9, 2, 3, 5, 7, 8, 4, 6],
+        ],
     },
 }
+
+
+def _build_moves(clue_grid, solution_grid):
+    moves = []
+    for r in range(9):
+        for c in range(9):
+            if clue_grid[r][c] == 0:
+                x = 2 * c + 1
+                y = 2 * r + 1
+                moves.append(f"mouse,left,{x},{y};key,{solution_grid[r][c]}")
+    return moves, moves[:], []
 
 
 def generate_puzzle_sudoku(level="easy"):
     p = _PUZZLES[level]
     clue_grid = p["clue_grid"]
+    solution_grid = p["solution_grid"]
     empty = sum(1 for r in range(9) for c in range(9) if clue_grid[r][c] == 0)
     now = datetime.now(timezone.utc).isoformat()
 
+    moves_full, moves_required, moves_hint = _build_moves(clue_grid, solution_grid)
+
     return {
-        "puzzle_url": f"http://pzv.jp/p.html?sudoku/9/9/{p['url_body']}",
+        "puzzle_url": f"http://localhost:8000/p.html?sudoku/9/9/{p['url_body']}",
         "pid": "sudoku",
         "sort_key": None,
         "width": 9,
         "height": 9,
         "area": 81,
-        "number_required_moves": 0,
-        "number_total_solution_moves": 0,
-        "puzzlink_url": f"https://puzz.link/p?sudoku/9/9/{p['url_body']}",
+        "number_required_moves": len(moves_required),
+        "number_total_solution_moves": len(moves_full),
+        "puzzlink_url": f"http://localhost:8000/p.html?sudoku/9/9/{p['url_body']}",
         "source": {
             "site_name": "ppbench_golden",
             "page_url": None,
@@ -80,9 +127,9 @@ def generate_puzzle_sudoku(level="easy"):
         },
         "created_at": now,
         "solution": {
-            "moves_full": [],
-            "moves_required": [],
-            "moves_hint": [],
+            "moves_full": moves_full,
+            "moves_required": moves_required,
+            "moves_hint": moves_hint,
         },
     }
 
