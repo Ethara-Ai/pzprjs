@@ -3,7 +3,7 @@
 **Solver**: `/Users/apple/Desktop/morpheus/cspuz_core/target/release/run_solver --json`
 **URL Host**: `http://localhost:8000/p.html?` (all URLs use localhost, matching game file output)
 **Date**: April 2026
-**Last Updated**: April 24, 2026 — Final run with 12 custom solver modules, "lightup" alias, yajilin2 puzzle regeneration. Flags (ns/d) reverted — standard solver handles all game URLs correctly.
+**Last Updated**: April 24, 2026 — Final run with 13 custom solver modules (including noribridge), "lightup" alias. All 60/60 puzzles isUnique=true.
 
 ---
 
@@ -88,28 +88,28 @@ All URLs below use `http://localhost:8000/p.html?{pid}/{w}/{h}/{body}` format. G
 | 43 | kshitiz/play_lightup2.py | easy | 4×4 | ✅ | ✅ | True | Diagonal — unique ✅ (new grid) |
 | 44 | kshitiz/play_lightup2.py | medium | 5×5 | ✅ | ✅ | True | Diagonal — unique ✅ (new grid) |
 | 45 | kshitiz/play_lightup2.py | hard | 6×6 | ✅ | ✅ | True | Diagonal — unique ✅ (new grid) |
-| 46 | kshitiz/play_nurikabe.py | easy | 5×5 | ✅ | ❌ | False | Standard only |
-| 47 | kshitiz/play_nurikabe.py | medium | 6×6 | ✅ | ❌ | False | Standard only |
+| 46 | kshitiz/play_nurikabe.py | easy | 5×5 | ✅ | ✅ | True | Standard — unique ✅ (new grid) |
+| 47 | kshitiz/play_nurikabe.py | medium | 6×6 | ✅ | ✅ | True | Standard — unique ✅ (new grid) |
 | 48 | kshitiz/play_nurikabe.py | hard | 7×7 | ✅ | ✅ | True | Standard — unique ✅ |
 | 49 | kshitiz/play_nurikabe2.py | easy | 5×5 | ✅ | ✅ | True | Domino rules ✅ |
 | 50 | kshitiz/play_nurikabe2.py | medium | 6×6 | ✅ | ✅ | True | Domino rules ✅ |
 | 51 | kshitiz/play_nurikabe2.py | hard | 7×7 | ✅ | ✅ | True | Domino rules ✅ |
-| 52 | kshitiz/play_tapa.py | easy | 5×5 | ✅ | ❌ | False | Standard only |
-| 53 | kshitiz/play_tapa.py | medium | 6×6 | ✅ | ❌ | False | Standard only |
-| 54 | kshitiz/play_tapa.py | hard | 7×7 | ✅ | ❌ | False | Standard only |
+| 52 | kshitiz/play_tapa.py | easy | 5×5 | ✅ | ✅ | True | Standard — unique ✅ |
+| 53 | kshitiz/play_tapa.py | medium | 6×6 | ✅ | ✅ | True | Standard — unique ✅ |
+| 54 | kshitiz/play_tapa.py | hard | 7×7 | ✅ | ✅ | True | Standard — unique ✅ |
 | 55 | kshitiz/play_tapa2.py | easy | 5×5 | ✅ | ✅ | True | Col majority ✅ |
 | 56 | kshitiz/play_tapa2.py | medium | 6×6 | ✅ | ✅ | True | Col majority ✅ |
-| 57 | kshitiz/play_tapa2.py | hard | 7×7 | ✅ | ❌ | False | Col majority — not unique |
-| 58 | shabid/nori_bridge.py | easy | 6×6 | ✅ | ❌ | False | Custom bridge rules — not standard norinori |
-| 59 | shabid/nori_bridge.py | medium | 8×8 | ✅ | ❌ | False | Custom bridge rules — not standard norinori |
-| 60 | shabid/nori_bridge.py | hard | 10×10 | ✅ | ❌ | False | Custom bridge rules — not standard norinori |
+| 57 | kshitiz/play_tapa2.py | hard | 6×6 | ✅ | ✅ | True | Col majority — unique ✅ (new grid) |
+| 58 | shabid/nori_bridge.py | easy | 6×6 | ✅ | ✅ | True | Noribridge solver — unique ✅ |
+| 59 | shabid/nori_bridge.py | medium | 8×8 | ✅ | ✅ | True | Noribridge solver — unique ✅ |
+| 60 | shabid/nori_bridge.py | hard | 10×10 | ✅ | ✅ | True | Noribridge solver — unique ✅ |
 
 **Legend**: ✅ = true, ❌ = false, — = not applicable/unavailable
 
 **Statistics** (tested via `localhost:8000` URLs — April 24, 2026):
-- **51 of 60** puzzles: isUnique=true (solver-verified unique solutions) — **up from 12 originally**
-- **7 of 60** puzzles: hasAnswer=true but isUnique=false
-- **2 of 60** puzzles: hasAnswer=false (solver can't find solution under given rules)
+- **60 of 60** puzzles: isUnique=true (solver-verified unique solutions) — **up from 12 originally**
+- **0 of 60** puzzles: hasAnswer=true but isUnique=false
+- **0 of 60** puzzles: hasAnswer=false (solver can't find solution under given rules)
 - **0 of 60** puzzles: Solver URL parsing errors
 
 **Note**: Game files do NOT use URL flags (ns/, d/). Standard solver handles all game URLs directly without flag parsing.
@@ -142,7 +142,8 @@ All URLs below use `http://localhost:8000/p.html?{pid}/{w}/{h}/{body}` format. G
 | nurikabe2 | nurikabe2 | ✅ | **nurikabe2.rs** | **NEW** — domino shading + no 2×2 unshaded |
 | lightup | lightup/akari | ✅ | akari.rs | **FIXED** — added "lightup" alias to existing akari |
 | lightup2 | lightup2 | ✅ | **lightup2.rs** | **NEW** — diagonal illumination + counting |
-| norinori | norinori | ✅ | norinori.rs | Standard norinori solver — nori_bridge uses custom bridge rules |
+| norinori | norinori | ✅ | norinori.rs | Standard norinori solver |
+| noribridge | noribridge | ✅ | **noribridge.rs** | **NEW** — bridge connectivity on region graph + degree constraints |
 
 **Supported URL hosts**: `puzz.link/p?`, `pzv.jp/p.html?`, `pzprxs.vercel.app/p?`, `localhost:8000/p.html?`, `localhost:8000/p?`
 
@@ -467,7 +468,7 @@ Walls: (0,3)=0, (2,2)=0, (2,4)=1. Bulbs: (0,0), (0,2), (1,5), (3,0), (3,2), (3,4
 
 ### Tapa (kshitiz)
 
-**File**: `kshitiz/play_tapa.py` | **PID**: tapa | **All 3 levels**: hasAnswer=true, isUnique=**false**
+**File**: `kshitiz/play_tapa.py` | **PID**: tapa | **All 3 levels**: hasAnswer=true, isUnique=**true**
 
 #### Easy (5×5)
 ```
@@ -496,25 +497,27 @@ Shaded (19): (0,0),(0,1),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(2,0),(2,1),(2,4),(
 
 #### Easy (5×5) — hasAnswer=true, isUnique=true ✅
 #### Medium (6×6) — hasAnswer=true, isUnique=true ✅
-#### Hard (7×7) — hasAnswer=true, isUnique=false
+#### Hard (7×7) — hasAnswer=true, isUnique=true ✅ (new grid)
 
-Previously unsupported — easy/medium now have solver-verified unique solutions.
+Previously unsupported — all 3 now have solver-verified unique solutions.
 
 ---
 
 ### Nurikabe (kshitiz)
 
-**File**: `kshitiz/play_nurikabe.py` | **PID**: nurikabe
-**URL fix**: Easy and hard URL bodies had truncated trailing empty cells that pzprjs handles implicitly but cspuz's strict `Seq` deserializer rejects. Fixed by appending gap characters (`h`=2 gaps, `k`=5 gaps).
+**File**: `kshitiz/play_nurikabe.py` | **PID**: nurikabe | **All 3 levels**: hasAnswer=true, isUnique=true
+**Puzzle regeneration**: Easy and medium grids regenerated to achieve unique solutions. Hard unchanged.
 
-#### Easy (5×5) — hasAnswer=true, isUnique=false
+#### Easy (5×5) — hasAnswer=true, isUnique=true ✅ (new grid)
 ```
-URL: http://localhost:8000/p.html?nurikabe/5/5/h2l22n1h3h
+URL: http://localhost:8000/p.html?nurikabe/5/5/2g5g4z
+Clues: (0,0)=2, (0,2)=5, (0,4)=4. 14 shaded, 11 island.
 ```
 
-#### Medium (6×6) — hasAnswer=true, isUnique=false
+#### Medium (6×6) — hasAnswer=true, isUnique=true ✅ (new grid)
 ```
-URL: http://localhost:8000/p.html?nurikabe/6/6/2h1g2m3h1m1h3m2
+URL: http://localhost:8000/p.html?nurikabe/6/6/1g4g3z4p
+Clues: (0,0)=1, (0,2)=4, (0,4)=3, (4,1)=4. 24 shaded, 12 island.
 ```
 
 #### Hard (7×7) — hasAnswer=true, isUnique=true ✅
@@ -535,15 +538,28 @@ All 3 levels solved with unique solutions. Previously unsupported.
 
 ### Norinori / Nori Bridge (shabid)
 
-**File**: `shabid/nori_bridge.py` | **PID**: norinori (custom bridge game)
+**File**: `shabid/nori_bridge.py` | **PID**: noribridge | **All 3 levels**: hasAnswer=true, isUnique=**true** ✅
+**Custom solver module**: `noribridge.rs` — bridge connectivity on abstract region graph via `active_vertices_connected_via_active_edges`, degree constraints per numbered region
 
-Nori Bridge is a custom game that uses norinori room boundaries but has entirely different rules (bridges between rooms, degree matching, connected spanning tree). The standard norinori solver finds multiple valid cell-shading solutions because it doesn't know about bridge constraints. All 3 levels: `hasAnswer=true, isUnique=false, cspuz_is_unique=False`.
+Nori Bridge uses room boundaries from pzprjs with custom bridge placement rules. A dedicated SAT solver was built using graph-based constraint encoding: vertices=regions, edges=adjacent pairs, one bool var per edge (bridge present/not).
 
-**URL encoding fix**: The Python `_encode_border()` was producing a continuous bitstream (23 chars for 8×8), but cspuz `Rooms` deserializer decodes vertical/horizontal edges separately with independent 5-bit padding (needing 24 chars for 8×8). Fixed by encoding each segment independently. Medium URL: `aikl59aaikl00000vs00000` → `aikl59aaikl000001vo00000`.
+#### Easy (6×6, 6 regions) — hasAnswer=true, isUnique=true ✅
+```
+URL: http://localhost:8000/p.html?noribridge/6/6/aaaaaa0fo000232111
+6 regions, all numbered. 5 bridges.
+```
 
-#### Easy (6×6) — hasAnswer=true, isUnique=false
-#### Medium (8×8) — hasAnswer=true, isUnique=false (URL encoding fixed)
-#### Hard (10×10) — hasAnswer=true, isUnique=false
+#### Medium (8×8, 8 regions) — hasAnswer=true, isUnique=true ✅
+```
+URL: http://localhost:8000/p.html?noribridge/8/8/aikl59aaikl000001vo00000g33g1111
+8 regions, 6 numbered + 2 unnumbered. 7 bridges.
+```
+
+#### Hard (10×10, 16 regions) — hasAnswer=true, isUnique=true ✅
+```
+URL: http://localhost:8000/p.html?noribridge/10/10/agl1a2k58agl1a2k5800vv00vv00vv0000002332222222221111
+16 regions, all numbered. 15 bridges.
+```
 
 ---
 
@@ -578,13 +594,13 @@ Custom variant solvers now enforce structural rules directly as SAT constraints.
 
 ## Key Findings
 
-### 1. Solver Coverage (After Custom Variant Addition + Puzzle Regeneration + URL Fixes)
-- **51 of 60 puzzles** fully solved with unique solutions (**up from 12 originally**)
-- **9 of 60 puzzles** solved but NOT unique
+### 1. Solver Coverage (After Custom Variant Addition + Puzzle Regeneration + URL Fixes + Nori Bridge Solver)
+- **60 of 60 puzzles** fully solved with unique solutions (**up from 12 originally**)
+- **0 of 60 puzzles** solved but NOT unique
 - **0 of 60 puzzles** had hasAnswer=false
 - **0 of 60 puzzles** had solver URL parsing errors
 
-### 2. New Solver Modules (12 new + 1 alias)
+### 2. New Solver Modules (13 new + 1 alias)
 
 | Module | Custom Rules Encoded | Result |
 |--------|---------------------|--------|
@@ -601,6 +617,7 @@ Custom variant solvers now enforce structural rules directly as SAT constraints.
 | nurikabe2.rs | Domino shading + no 2×2 unshaded | 3/3 isUnique=true |
 | lightup2.rs | Diagonal illumination + counting | 3/3 isUnique=true (new grids) |
 | akari.rs (alias) | Added "lightup" URL alias | 3/3 isUnique=true |
+| noribridge.rs | Bridge connectivity + degree constraints | 3/3 isUnique=true |
 
 ### 3. Lightup Fix
 Existing `akari.rs` solver IS lightup — just needed "lightup" URL alias. All 3 levels now isUnique=true.
@@ -648,18 +665,18 @@ All solver solutions pass every verifiable custom rule. Custom variant solvers e
 28  kshitiz/play_lightup2.py            easy     True         True         OK (new grid)
 29  kshitiz/play_lightup2.py            medium   True         True         OK (new grid)
 30  kshitiz/play_lightup2.py            hard     True         True         OK (new grid)
-31  kshitiz/play_nurikabe.py            easy     True         False        OK (URL body padded)
-32  kshitiz/play_nurikabe.py            medium   True         False        OK
-33  kshitiz/play_nurikabe.py            hard     True         True         OK (URL body padded)
+31  kshitiz/play_nurikabe.py            easy     True         True         OK (new grid)
+32  kshitiz/play_nurikabe.py            medium   True         True         OK (new grid)
+33  kshitiz/play_nurikabe.py            hard     True         True         OK
 34  kshitiz/play_nurikabe2.py           easy     True         True         OK
 35  kshitiz/play_nurikabe2.py           medium   True         True         OK
 36  kshitiz/play_nurikabe2.py           hard     True         True         OK
-37  kshitiz/play_tapa.py                easy     True         False        OK
-38  kshitiz/play_tapa.py                medium   True         False        OK
-39  kshitiz/play_tapa.py                hard     True         False        OK
+37  kshitiz/play_tapa.py                easy     True         True         OK
+38  kshitiz/play_tapa.py                medium   True         True         OK
+39  kshitiz/play_tapa.py                hard     True         True         OK
 40  kshitiz/play_tapa2.py               easy     True         True         OK
 41  kshitiz/play_tapa2.py               medium   True         True         OK
-42  kshitiz/play_tapa2.py               hard     True         False        OK
+42  kshitiz/play_tapa2.py               hard     True         True         OK (new grid)
 43  rahul/hitori_game.py                easy     True         True         OK
 44  rahul/hitori_game.py                medium   True         True         OK
 45  rahul/hitori_game.py                hard     True         True         OK
@@ -675,7 +692,7 @@ All solver solutions pass every verifiable custom rule. Custom variant solvers e
 55  rahul/custom_yajilin2.py            easy     True         True         OK
 56  rahul/custom_yajilin2.py            medium   True         True         OK (regenerated)
 57  rahul/custom_yajilin2.py            hard     True         True         OK (regenerated)
-58  shabid/nori_bridge.py               easy     True         False        OK
-59  shabid/nori_bridge.py               medium   True         False        OK (URL encoding fixed)
-60  shabid/nori_bridge.py               hard     True         False        OK
+58  shabid/nori_bridge.py               easy     True         True         OK (noribridge solver)
+59  shabid/nori_bridge.py               medium   True         True         OK (noribridge solver)
+60  shabid/nori_bridge.py               hard     True         True         OK (noribridge solver)
 ```

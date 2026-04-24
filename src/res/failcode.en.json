@@ -988,5 +988,10 @@
     "tentAround.tents": "Some tents touch.",
     "tooFewUnspecified.railpool": "The region contains fewer unspecified segment lengths than question marks.",
     "tooManyUnspecified.railpool": "The region contains more unspecified segment lengths than question marks.",
-    "unusedCell": "A cell is unused."
+    "unusedCell": "A cell is unused.",
+    "brNone.noribridge": "No bridges have been placed.",
+    "brDuplicate.noribridge": "Multiple bridges exist between the same room pair.",
+    "brDegreeOver.noribridge": "Too many bridges for the numbered region.",
+    "brDegreeUnder.noribridge": "Too few bridges for the numbered region.",
+    "brDisconnected.noribridge": "Not all regions are connected via bridges."
 }

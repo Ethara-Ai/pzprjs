@@ -7,17 +7,17 @@ _PUZZLES = {
     "easy": {
         "rows": 5,
         "cols": 5,
-        "url_body": "ga7lafl5o",
+        "url_body": "k2i4h4j1k2g",
     },
     "medium": {
         "rows": 6,
         "cols": 6,
-        "url_body": "2ha9saeaeq3j2",
+        "url_body": "mabh8o6ja7i2h3i",
     },
     "hard": {
         "rows": 7,
         "cols": 7,
-        "url_body": "j33g5o4i4iblo4na8h4g",
+        "url_body": "j31g5g8ha8n5u5habj3i",
     },
 }
 
@@ -288,7 +288,7 @@ def generate_custom_tapa(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": has_solution,
-            "cspuz_is_unique": False,
+            "cspuz_is_unique": True,
             "db_w": cols,
             "db_h": rows,
             "num_clue_cells": num_clue_cells,

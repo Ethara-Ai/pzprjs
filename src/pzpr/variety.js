@@ -318,6 +318,7 @@
 			nikoji: [0, 0, "NIKOJI", "NIKOJI", "cbblock"],
 			nondango: [0, 0, "ノンダンゴ", "Nondango"],
 			nonogram: [0, 0, "ののぐらむ", "Nonogram"],
+			noribridge: [0, 0, "のりブリッジ", "Nori Bridge", "noribridge"],
 			norinori: [0, 1, "のりのり", "Norinori", "lits"],
 			norinuri: [0, 0, "海苔ぬり", "Norinuri", "nurikabe"],
 			nothing: [0, 0, "オールｏｒナッシング", "All or Nothing", "country"],

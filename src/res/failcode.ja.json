@@ -966,5 +966,10 @@
     "bk2x2": "",
     "nmArrowGt": "",
     "cuGt3.sansaroad": "",
-    "cePluralLine.bunnyhop": ""
+    "cePluralLine.bunnyhop": "",
+    "brNone.noribridge": "橋が一つも配置されていません。",
+    "brDuplicate.noribridge": "同じ部屋ペア間に複数の橋があります。",
+    "brDegreeOver.noribridge": "数字のある部屋の橋の数が多すぎます。",
+    "brDegreeUnder.noribridge": "数字のある部屋の橋の数が少なすぎます。",
+    "brDisconnected.noribridge": "すべての部屋が橋でつながっていません。"
 }
