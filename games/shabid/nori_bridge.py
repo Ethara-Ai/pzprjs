@@ -65,25 +65,36 @@ _HARD = {
 _PUZZLES = {"easy": _EASY, "medium": _MEDIUM, "hard": _HARD}
 
 def _encode_border(room_grid, rows, cols):
-    """Encode region borders as a base-32 string (pzprjs encodeBorder)."""
-    bits = []
+    """Encode region borders as a base-32 string (pzprjs encodeBorder).
+
+    cspuz Rooms deserializer decodes vertical and horizontal border arrays
+    separately, each padded to a multiple of 5 bits. So we must encode them
+    as two independent base-32 segments concatenated together.
+    """
+    def _bits_to_base32(bits):
+        encoded = ""
+        for i in range(0, len(bits), 5):
+            val = 0
+            for j in range(5):
+                if i + j < len(bits):
+                    val += bits[i + j] * [16, 8, 4, 2, 1][j]
+            if val < 10:
+                encoded += str(val)
+            else:
+                encoded += chr(ord('a') + val - 10)
+        return encoded
+
+    vert_bits = []
     for r in range(rows):
         for c in range(cols - 1):
-            bits.append(1 if room_grid[r][c] != room_grid[r][c + 1] else 0)
+            vert_bits.append(1 if room_grid[r][c] != room_grid[r][c + 1] else 0)
+
+    horiz_bits = []
     for r in range(rows - 1):
         for c in range(cols):
-            bits.append(1 if room_grid[r][c] != room_grid[r + 1][c] else 0)
-    encoded = ""
-    for i in range(0, len(bits), 5):
-        val = 0
-        for j in range(5):
-            if i + j < len(bits):
-                val += bits[i + j] * [16, 8, 4, 2, 1][j]
-        if val < 10:
-            encoded += str(val)
-        else:
-            encoded += chr(ord('a') + val - 10)
-    return encoded
+            horiz_bits.append(1 if room_grid[r][c] != room_grid[r + 1][c] else 0)
+
+    return _bits_to_base32(vert_bits) + _bits_to_base32(horiz_bits)
 
 def _find_border_segments(room_grid, rows, cols):
     segments = []
@@ -226,7 +237,7 @@ def generate_puzzle(difficulty):
         },
         "metadata": {
             "has_structured_solution": True,
-            "cspuz_is_unique": None if difficulty == "medium" else False,
+            "cspuz_is_unique": False,
             "db_w": cols,
             "db_h": rows,
             "num_regions": num_regions,

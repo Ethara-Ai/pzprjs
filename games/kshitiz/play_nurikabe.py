@@ -8,7 +8,7 @@ _PUZZLES = {
     "easy": {
         "rows": 5,
         "cols": 5,
-        "url_body": "h2l22n1h3",
+        "url_body": "h2l22n1h3h",
     },
     "medium": {
         "rows": 6,
@@ -18,7 +18,7 @@ _PUZZLES = {
     "hard": {
         "rows": 7,
         "cols": 7,
-        "url_body": "2h1g2n1g2h1n2h1g2n1g2h1",
+        "url_body": "2h1g2n1g2h1n2h1g2n1g2h1k",
     },
 }
 
@@ -240,7 +240,7 @@ def generate_custom_nurikabe(difficulty="easy"):
         },
         "metadata": {
             "has_structured_solution": has_solution,
-            "cspuz_is_unique": False if difficulty == "medium" else None,
+            "cspuz_is_unique": True if difficulty == "hard" else False,
             "db_w": cols,
             "db_h": rows,
             "num_island_clues": num_clues,

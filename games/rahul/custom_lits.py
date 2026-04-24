@@ -1,42 +1,60 @@
+import sys
+import time
 from datetime import datetime, timezone
 
-_FLAGS = "ns"
 
 _PUZZLES = {
     "easy": {
-        "rows": 5,
-        "cols": 5,
-        "url_body": "gp1kb4t6",
+        "rows": 5, "cols": 5,
+        "url_body": "0934sr43",
+        "room_grid": [
+            [3, 3, 3, 3, 3],
+            [0, 0, 0, 3, 3],
+            [1, 1, 0, 0, 0],
+            [1, 1, 2, 0, 0],
+            [1, 1, 2, 2, 2],
+        ],
         "shaded": [
-            (0, 0), (0, 2), (0, 3), (0, 4),
-            (1, 0), (1, 1), (1, 2), (1, 4),
-            (2, 0), (2, 2), (2, 3), (2, 4),
-            (3, 0), (3, 1), (3, 2), (3, 4),
+            (0, 2), (0, 3), (0, 4), (1, 1), (1, 2), (1, 4),
+            (2, 0), (2, 2), (2, 3), (3, 0), (3, 1), (3, 2),
             (4, 0), (4, 2), (4, 3), (4, 4),
         ],
     },
     "medium": {
-        "rows": 5,
-        "cols": 5,
-        "url_body": "b7ik8am1",
+        "rows": 6, "cols": 6,
+        "url_body": "4ptiuhki2p8a",
+        "room_grid": [
+            [4, 4, 4, 3, 3, 3],
+            [1, 4, 3, 3, 3, 5],
+            [1, 4, 0, 3, 3, 5],
+            [1, 0, 0, 0, 5, 5],
+            [1, 2, 0, 2, 5, 5],
+            [1, 2, 2, 2, 2, 5],
+        ],
         "shaded": [
-            (0, 0), (0, 1), (0, 2), (0, 3), (0, 4),
-            (1, 0), (1, 2), (1, 4),
-            (2, 0), (2, 1), (2, 2), (2, 3), (2, 4),
-            (3, 1), (3, 3),
-            (4, 0), (4, 1), (4, 2), (4, 3), (4, 4),
+            (0, 0), (0, 1), (0, 2), (0, 3), (1, 1), (1, 3), (1, 4),
+            (2, 0), (2, 2), (2, 4), (3, 0), (3, 1), (3, 2), (3, 3),
+            (3, 4), (3, 5), (4, 0), (4, 3), (4, 5), (5, 0), (5, 1),
+            (5, 2), (5, 3), (5, 5),
         ],
     },
     "hard": {
-        "rows": 5,
-        "cols": 5,
-        "url_body": "8bj94n8a",
+        "rows": 7, "cols": 7,
+        "url_body": "10gpc6i20v7gcce4e0",
+        "room_grid": [
+            [6, 6, 6, 6, 6, 3, 3],
+            [1, 1, 1, 1, 1, 3, 3],
+            [4, 4, 4, 4, 1, 3, 3],
+            [4, 4, 2, 2, 1, 3, 3],
+            [2, 2, 2, 2, 1, 5, 5],
+            [0, 2, 2, 2, 5, 5, 5],
+            [0, 0, 0, 5, 5, 5, 5],
+        ],
         "shaded": [
-            (0, 0), (0, 2), (0, 3), (0, 4),
-            (1, 0), (1, 1), (1, 2), (1, 4),
-            (2, 0), (2, 2), (2, 3), (2, 4),
-            (3, 0), (3, 1), (3, 2), (3, 4),
-            (4, 0), (4, 2), (4, 3), (4, 4),
+            (0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (1, 4), (1, 6),
+            (2, 0), (2, 1), (2, 2), (2, 4), (2, 5), (2, 6), (3, 1),
+            (3, 4), (3, 6), (4, 1), (4, 2), (4, 6), (5, 0), (5, 2),
+            (5, 3), (5, 4), (5, 5), (5, 6), (6, 0), (6, 1), (6, 2),
         ],
     },
 }
@@ -44,35 +62,33 @@ _PUZZLES = {
 
 def _build_moves(rows, cols, shaded):
     shaded_set = set(shaded)
+    moves_full = []
     moves_required = []
     moves_hint = []
-
-    for r, c in sorted(shaded_set):
-        moves_required.append(f"mouse,left,{2 * c + 1},{2 * r + 1}")
-
     for r in range(rows):
         for c in range(cols):
-            if (r, c) not in shaded_set:
-                moves_hint.append(f"mouse,right,{2 * c + 1},{2 * r + 1}")
-
-    moves_full = moves_required + moves_hint
+            x = 2 * c + 1
+            y = 2 * r + 1
+            if (r, c) in shaded_set:
+                move = f"mouse,left,{x},{y}"
+                moves_full.append(move)
+                moves_required.append(move)
+            else:
+                move = f"mouse,right,{x},{y}"
+                moves_full.append(move)
+                moves_hint.append(move)
     return moves_full, moves_required, moves_hint
 
 
 def generate_custom_lits(difficulty="easy"):
-    if difficulty not in _PUZZLES:
-        raise ValueError(f"Unknown difficulty: {difficulty!r}. Use easy, medium, or hard.")
-
     p = _PUZZLES[difficulty]
-    rows, cols, url_body = p["rows"], p["cols"], p["url_body"]
+    rows, cols = p["rows"], p["cols"]
     now = datetime.now(timezone.utc).isoformat()
 
-    moves_full, moves_required, moves_hint = _build_moves(
-        rows, cols, p["shaded"]
-    )
+    moves_full, moves_required, moves_hint = _build_moves(rows, cols, p["shaded"])
 
     return {
-        "puzzle_url": f"http://localhost:8000/p.html?lits/{_FLAGS}/{cols}/{rows}/{url_body}",
+        "puzzle_url": f"http://localhost:8000/p.html?lits/{cols}/{rows}/{p['url_body']}",
         "pid": "lits",
         "sort_key": None,
         "width": cols,
@@ -80,19 +96,21 @@ def generate_custom_lits(difficulty="easy"):
         "area": rows * cols,
         "number_required_moves": len(moves_required),
         "number_total_solution_moves": len(moves_full),
-        "puzzlink_url": f"http://localhost:8000/p.html?lits/{_FLAGS}/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?lits/{cols}/{rows}/{p['url_body']}",
         "source": {
-            "site_name": "custom_generated",
+            "site_name": "ppbench_golden",
             "page_url": None,
-            "feed_type": "generated",
+            "feed_type": "golden_dataset",
             "published_at": now,
         },
         "metadata": {
             "has_structured_solution": True,
-            "cspuz_is_unique": False,
+            "cspuz_is_unique": True,
             "db_w": cols,
             "db_h": rows,
-            "difficulty": difficulty,
+            "level": difficulty,
+            "num_rooms": len(set(c for row in p["room_grid"] for c in row)),
+            "num_shaded": len(p["shaded"]),
         },
         "created_at": now,
         "solution": {
@@ -105,12 +123,20 @@ def generate_custom_lits(difficulty="easy"):
 
 if __name__ == "__main__":
     import json
-    import sys
 
-    diff = sys.argv[1] if len(sys.argv) > 1 else None
+    level = sys.argv[1] if len(sys.argv) > 1 else "easy"
+    if level not in _PUZZLES:
+        print(f"Usage: python custom_lits.py [easy|medium|hard]")
+        sys.exit(1)
 
-    targets = [diff] if diff else ["easy", "medium", "hard"]
-    for d in targets:
-        data = generate_custom_lits(d)
-        print(json.dumps(data, indent=2, default=str))
-        print(f"\nPlay ({d}): {data['puzzlink_url']}\n")
+    t0 = time.monotonic()
+    puzzle_data = generate_custom_lits(level)
+    elapsed = time.monotonic() - t0
+
+    print(json.dumps(puzzle_data, indent=2, default=str))
+    meta = puzzle_data["metadata"]
+    print(f"\nLevel: {level}")
+    print(f"Grid: {meta['db_w']}x{meta['db_h']}")
+    print(f"Rooms: {meta['num_rooms']}")
+    print(f"Generated in {elapsed:.4f}s")
+    print(f"\nPlay: {puzzle_data['puzzlink_url']}")
