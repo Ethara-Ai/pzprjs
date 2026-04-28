@@ -7,17 +7,17 @@ _PUZZLES = {
     "easy": {
         "rows": 4,
         "cols": 4,
-        "url_body": "i01..0..i.c",
+        "url_body": "h.10k0g.g.g",
     },
     "medium": {
         "rows": 5,
         "cols": 5,
-        "url_body": "0h0n2i1h3h0h",
+        "url_body": ".h2.h.h2j.g0h.h0g",
     },
     "hard": {
         "rows": 6,
         "cols": 6,
-        "url_body": "h0t0g1h11i2h1i1g",
+        "url_body": "0i000k..g0.g.g..h2i0i.i",
     },
 }
 

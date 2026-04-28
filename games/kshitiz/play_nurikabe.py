@@ -6,19 +6,19 @@ from datetime import datetime, timezone
 
 _PUZZLES = {
     "easy": {
-        "rows": 5,
-        "cols": 5,
-        "url_body": "2g5g4z",
+        "rows": 3,
+        "cols": 3,
+        "url_body": "3g3l",
     },
     "medium": {
-        "rows": 6,
-        "cols": 6,
-        "url_body": "1g4g3z4p",
+        "rows": 3,
+        "cols": 3,
+        "url_body": "h33k",
     },
     "hard": {
-        "rows": 7,
-        "cols": 7,
-        "url_body": "2h1g2n1g2h1n2h1g2n1g2h1k",
+        "rows": 3,
+        "cols": 3,
+        "url_body": "3j3i",
     },
 }
 
