@@ -290,15 +290,15 @@ def generate_custom_tapa(difficulty="easy"):
         moves = {"moves_full": [], "moves_required": [], "moves_hint": []}
 
     return {
-        "puzzle_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
-        "pid": "tapa",
+        "puzzle_url": f"http://localhost:8000/p.html?tapa_custom/{cols}/{rows}/{url_body}",
+        "pid": "tapa_custom",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
         "number_required_moves": len(moves["moves_required"]),
         "number_total_solution_moves": len(moves["moves_full"]),
-        "puzzlink_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?tapa_custom/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,

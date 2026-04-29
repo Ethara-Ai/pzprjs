@@ -937,6 +937,7 @@
     "pairedLetterNe.kinkonkan": "Beam from a light doesn't reach its pair.",
     "pairedNumberNe.kinkonkan": "The number of reflections is wrong.",
     "pcMultipleTips.pencils": "A pencil has more than one tip.",
+    "ppVertexParity.paritypipes": "The vertex does not match its color (black=loop passes, white=loop skips).",
     "ptInPencil.pencils": "A tip is inside a pencil.",
     "ptNoLine.pencils": "A pencil tip is not connected to a line.",
     "ptNoPencil.pencils": "A tip is not at the short end of a 1xN rectangle.",

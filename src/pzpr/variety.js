@@ -350,6 +350,7 @@
 			outofsight: [0, 0, "Out Of Sight", "Out Of Sight", "yajikazu"],
 			oyakodori: [0, 0, "おやこどり", "Oyakodori", "kaero"],
 			paintarea: [1, 0, "ペイントエリア", "Paintarea"],
+			paritypipes: [0, 0, "パリティパイプス", "Parity Pipes"],
 			parquet: [0, 0, "Parquet", "Parquet"],
 			patchwork: [0, 0, "パッチワーク", "Patchwork"],
 			pencils: [0, 0, "ペンシルズ", "Pencils"],

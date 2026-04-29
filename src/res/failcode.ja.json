@@ -594,6 +594,7 @@
     "pairedLetterNe.kinkonkan": "光が同じ文字の場所へ到達しません。",
     "pairedNumberNe.kinkonkan": "光の反射回数が正しくありません。",
     "pcMultipleTips.pencils": "2つ以上の芯を持つ鉛筆があります。",
+    "ppVertexParity.paritypipes": "頂点の状態が色と一致しません（黒=ループ通過、白=ループ非通過）。",
     "ptInPencil.pencils": "芯が他の鉛筆の軸に入り込んでいます。",
     "ptNoLine.pencils": "線が繋がっていない芯があります。",
     "ptNoPencil.pencils": "幅が1の長方形の軸の先端に位置していない芯があります。",
