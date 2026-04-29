@@ -1,6 +1,9 @@
+import json
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 
 _PUZZLES = {
@@ -63,6 +66,32 @@ def _ray_cells(grid, r, c, rows, cols):
             nr += dr
             nc += dc
     return cells
+
+
+def _solve_lightup_cspuz(url, rows, cols):
+    solver_path = Path(__file__).resolve().parents[3] / "cspuz_core" / "target" / "release" / "run_solver"
+    if not solver_path.exists():
+        return None
+
+    try:
+        result = subprocess.run(
+            [str(solver_path), "--json", url],
+            capture_output=True, text=True, timeout=60,
+        )
+        if result.returncode != 0:
+            return None
+        data = json.loads(result.stdout)
+        if not data.get("hasAnswer"):
+            return None
+        bulbs = set()
+        for item in data["data"]:
+            if isinstance(item.get("item"), str) and item["item"] == "circle":
+                r = (item["y"] - 1) // 2
+                c = (item["x"] - 1) // 2
+                bulbs.add((r, c))
+        return bulbs if bulbs else None
+    except (subprocess.TimeoutExpired, json.JSONDecodeError, KeyError):
+        return None
 
 
 def _solve_lightup(grid, rows, cols):
@@ -173,7 +202,11 @@ def generate_custom_lightup(difficulty="easy"):
     num_black = sum(1 for r in range(rows) for c in range(cols) if grid[r][c] != -1)
     num_numbered = sum(1 for r in range(rows) for c in range(cols) if grid[r][c] >= 0)
 
-    solution = _solve_lightup(grid, rows, cols)
+    url = f"http://localhost:8000/p.html?lightup/{cols}/{rows}/{url_body}"
+    solution = _solve_lightup_cspuz(url, rows, cols)
+    if solution is None:
+        solution = _solve_lightup(grid, rows, cols)
+
     if solution is not None:
         moves = _build_moves(solution)
         has_solution = True
