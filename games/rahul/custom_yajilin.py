@@ -11,12 +11,12 @@ _PUZZLES = {
     },
     "medium": {
         "rows": 6, "cols": 6,
-        "url_body": "g20h200010o31a",
+        "url_body": "g20h201010o31a",
         "shaded": [(2, 3), (5, 3), (5, 5)],
     },
     "hard": {
         "rows": 7, "cols": 7,
-        "url_body": "c22i30i11b01d30g01c01a022020a",
+        "url_body": "c22i30i11b31d30g31c31a122020a",
         "shaded": [(0, 2), (0, 6), (3, 3), (5, 3), (6, 0), (6, 2), (6, 6)],
     },
 }

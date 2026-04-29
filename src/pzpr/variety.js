@@ -349,6 +349,7 @@
 			orbital: [0, 0, "オービタル", "Orbital", "nagenawa"],
 			outofsight: [0, 0, "Out Of Sight", "Out Of Sight", "yajikazu"],
 			oyakodori: [0, 0, "おやこどり", "Oyakodori", "kaero"],
+			pairloop: [0, 0, "ペアループ", "Pairloop"],
 			paintarea: [1, 0, "ペイントエリア", "Paintarea"],
 			parquet: [0, 0, "Parquet", "Parquet"],
 			patchwork: [0, 0, "パッチワーク", "Patchwork"],
