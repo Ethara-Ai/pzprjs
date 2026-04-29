@@ -11,14 +11,14 @@ _PUZZLES = {
         "url_body": "3g3l",
     },
     "medium": {
-        "rows": 3,
-        "cols": 3,
-        "url_body": "h33k",
+        "rows": 5,
+        "cols": 4,
+        "url_body": "2g2l3g3n",
     },
     "hard": {
-        "rows": 3,
-        "cols": 3,
-        "url_body": "3j3i",
+        "rows": 8,
+        "cols": 4,
+        "url_body": "2g2l3g3n3g3o",
     },
 }
 
@@ -58,32 +58,19 @@ def _decode_number16(url_body, rows, cols):
     return grid
 
 
-def _gen_polyominoes(r0, c0, n, rows, cols):
+def _gen_straight_lines(r0, c0, n, rows, cols):
+    """Generate all straight-line (horizontal/vertical) island placements
+    of length *n* that include the clue cell (r0, c0)."""
     if n == 1:
         return [frozenset([(r0, c0)])]
-    results = set()
-
-    def _expand(cells, border):
-        if len(cells) == n:
-            results.add(cells)
-            return
-        for (r, c) in sorted(border):
-            new_cells = cells | frozenset([(r, c)])
-            new_border = set(border)
-            new_border.discard((r, c))
-            for dr, dc in _DIRS:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in new_cells:
-                    new_border.add((nr, nc))
-            _expand(new_cells, frozenset(new_border))
-
-    border_set = set()
-    for dr, dc in _DIRS:
-        nr, nc = r0 + dr, c0 + dc
-        if 0 <= nr < rows and 0 <= nc < cols:
-            border_set.add((nr, nc))
-    _expand(frozenset([(r0, c0)]), frozenset(border_set))
-    return list(results)
+    lines = []
+    # Horizontal lines through (r0, c0)
+    for start_c in range(max(0, c0 - n + 1), min(cols - n + 1, c0 + 1)):
+        lines.append(frozenset((r0, start_c + j) for j in range(n)))
+    # Vertical lines through (r0, c0)
+    for start_r in range(max(0, r0 - n + 1), min(rows - n + 1, r0 + 1)):
+        lines.append(frozenset((start_r + j, c0) for j in range(n)))
+    return lines
 
 
 def _solve_nurikabe(grid, rows, cols):
@@ -95,8 +82,8 @@ def _solve_nurikabe(grid, rows, cols):
 
     options = []
     for r, c, n in clues:
-        polys = _gen_polyominoes(r, c, n, rows, cols)
-        options.append(polys)
+        lines = _gen_straight_lines(r, c, n, rows, cols)
+        options.append(lines)
 
     if any(len(o) == 0 for o in options):
         return None
@@ -118,44 +105,29 @@ def _solve_nurikabe(grid, rows, cols):
                     return True
         return False
 
-    def _has_2x2_shaded():
+    def _shaded_regions_valid():
         all_island = set(cell_owner.keys())
-        for r in range(rows - 1):
-            for c in range(cols - 1):
-                if ((r, c) not in all_island
-                        and (r, c + 1) not in all_island
-                        and (r + 1, c) not in all_island
-                        and (r + 1, c + 1) not in all_island):
-                    return True
-        return False
-
-    def _shaded_connected():
-        all_island = set(cell_owner.keys())
-        shaded = []
+        visited = set()
         for r in range(rows):
             for c in range(cols):
-                if (r, c) not in all_island:
-                    shaded.append((r, c))
-        if len(shaded) <= 1:
-            return True
-        shaded_set = set(shaded)
-        visited = {shaded[0]}
-        queue = deque([shaded[0]])
-        while queue:
-            cr, cc = queue.popleft()
-            for nr, nc in _neighbors(cr, cc):
-                if (nr, nc) in shaded_set and (nr, nc) not in visited:
-                    visited.add((nr, nc))
-                    queue.append((nr, nc))
-        return len(visited) == len(shaded)
+                if (r, c) not in all_island and (r, c) not in visited:
+                    region_size = 0
+                    queue = deque([(r, c)])
+                    visited.add((r, c))
+                    while queue:
+                        cr, cc = queue.popleft()
+                        region_size += 1
+                        if region_size > 3:
+                            return False
+                        for nr, nc in _neighbors(cr, cc):
+                            if (nr, nc) not in all_island and (nr, nc) not in visited:
+                                visited.add((nr, nc))
+                                queue.append((nr, nc))
+        return True
 
     def _backtrack(order_idx):
         if order_idx == len(clues):
-            if _has_2x2_shaded():
-                return False
-            if not _shaded_connected():
-                return False
-            return True
+            return _shaded_regions_valid()
         idx = indices[order_idx]
         for poly in options[idx]:
             if any(c in cell_owner for c in poly):
@@ -223,15 +195,15 @@ def generate_custom_nurikabe(difficulty="easy"):
         has_solution = False
 
     return {
-        "puzzle_url": f"http://localhost:8000/p.html?nurikabe/{cols}/{rows}/{url_body}",
-        "pid": "nurikabe",
+        "puzzle_url": f"http://localhost:8000/p.html?nurikabe_custom/{cols}/{rows}/{url_body}",
+        "pid": "nurikabe_custom",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
         "number_required_moves": len(moves_required),
         "number_total_solution_moves": len(moves_full),
-        "puzzlink_url": f"http://localhost:8000/p.html?nurikabe/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?nurikabe_custom/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,
