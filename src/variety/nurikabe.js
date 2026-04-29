@@ -378,13 +378,31 @@
 		// 正解判定処理実行部
 		"AnsCheck@nurikabe": {
 			checklist: [
-				"check2x2ShadeCell",
+				"checkShadeMax3",
+				"checkStraightLineIslands",
 				"checkNoNumberInUnshade",
-				"checkConnectShade",
 				"checkDoubleNumberInUnshade",
 				"checkNumberAndUnshadeSize",
 				"doneShadingDecided"
-			]
+			],
+			checkShadeMax3: function() {
+				this.checkAllArea(
+					this.board.sblkmgr,
+					function(w, h, a, n) {
+						return a <= 3;
+					},
+					"csGt3"
+				);
+			},
+			checkStraightLineIslands: function() {
+				this.checkAllArea(
+					this.board.ublkmgr,
+					function(w, h, a, n) {
+						return (w === 1 || h === 1) && w * h === a;
+					},
+					"bkNotLine"
+				);
+			}
 		},
 		"AnsCheck@nuribou#1": {
 			checklist: [
