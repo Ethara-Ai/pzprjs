@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["lits", "norinori", "invlitso"], {
+})(["lits", "norinori", "invlitso", "lits2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -181,6 +181,10 @@
 	Encode: {
 		decodePzpr: function(type) {
 			var parser = this.puzzle.pzpr.parser;
+			this.puzzle.setConfig(
+				"lits_no_sameshape",
+				this.checkpflag("n") && this.checkpflag("s")
+			);
 			var oldflag =
 				(type === parser.URL_PZPRV3 && this.checkpflag("d")) ||
 				(type === parser.URL_PZPRAPP && !this.checkpflag("c"));
@@ -191,9 +195,14 @@
 			}
 		},
 		encodePzpr: function(type) {
+			var flags = "";
 			if (type === this.puzzle.pzpr.parser.URL_PZPRAPP && this.pid === "lits") {
-				this.outpflag = "c";
+				flags += "c";
 			}
+			if (this.puzzle.getConfig("lits_no_sameshape")) {
+				flags += "ns";
+			}
+			this.outpflag = flags;
 			this.encodeBorder();
 		},
 
@@ -426,6 +435,9 @@
 		},
 
 		checkTetromino: function() {
+			if (this.puzzle.getConfig("lits_no_sameshape")) {
+				return;
+			}
 			var result = true,
 				bd = this.board;
 			function func(cell1, cell2) {

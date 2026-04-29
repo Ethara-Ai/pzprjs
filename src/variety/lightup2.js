@@ -1,5 +1,5 @@
 //
-// パズル固有スクリプト部 美術館版 lightup.js
+// パズル固有スクリプト部 美術館2版 lightup2.js
 //
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["lightup", "lightup2"], {
+})(["lightup2"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -57,7 +57,7 @@
 	// 盤面管理系
 	Cell: {
 		akariinfo: 0 /* 0:なし 1:あかり 2:黒マス */,
-		qlight: 0, // ExCell基準に表示している情報を保持する変数
+		qlight: 0,
 
 		numberRemainsUnshaded: true,
 
@@ -132,28 +132,67 @@
 			);
 		},
 
+		/* Diagonal ray illumination: 4 diagonal directions until wall/edge */
 		akariRangeClist: function() {
 			var clist = new this.klass.CellList(),
 				bd = this.board;
-
-			/* 3×3 box centered on this cell (skip walls) */
-			for (var dy = -2; dy <= 2; dy += 2) {
-				for (var dx = -2; dx <= 2; dx += 2) {
-					var cell2 = bd.getc(this.bx + dx, this.by + dy);
-					if (!cell2.isnull && cell2.qnum === -1) {
-						clist.add(cell2);
+			var dirs = [
+				[-2, -2],
+				[-2, 2],
+				[2, -2],
+				[2, 2]
+			];
+			for (var d = 0; d < dirs.length; d++) {
+				var dx = dirs[d][0],
+					dy = dirs[d][1];
+				var bx = this.bx + dx,
+					by = this.by + dy;
+				while (true) {
+					var cell2 = bd.getc(bx, by);
+					if (cell2.isnull) {
+						break;
 					}
+					if (cell2.qnum !== -1) {
+						break;
+					}
+					clist.add(cell2);
+					bx += dx;
+					by += dy;
 				}
 			}
 			return clist;
 		},
 		viewRange: function() {
-			return {
-				x1: this.bx - 2,
-				x2: this.bx + 2,
-				y1: this.by - 2,
-				y2: this.by + 2
-			};
+			var bd = this.board,
+				x1 = this.bx,
+				x2 = this.bx,
+				y1 = this.by,
+				y2 = this.by;
+			var dirs = [
+				[-2, -2],
+				[-2, 2],
+				[2, -2],
+				[2, 2]
+			];
+			for (var d = 0; d < dirs.length; d++) {
+				var dx = dirs[d][0],
+					dy = dirs[d][1];
+				var bx = this.bx + dx,
+					by = this.by + dy;
+				while (true) {
+					var cell2 = bd.getc(bx, by);
+					if (cell2.isnull || cell2.qnum !== -1) {
+						break;
+					}
+					if (bx < x1) { x1 = bx; }
+					if (bx > x2) { x2 = bx; }
+					if (by < y1) { y1 = by; }
+					if (by > y2) { y2 = by; }
+					bx += dx;
+					by += dy;
+				}
+			}
+			return { x1: x1, x2: x2, y1: y1, y2: y2 };
 		}
 	},
 
@@ -262,13 +301,6 @@
 		},
 		encodePzpr: function(type) {
 			this.encode4Cell();
-		},
-
-		decodeKanpen: function() {
-			this.fio.decodeCellQnumb();
-		},
-		encodeKanpen: function() {
-			this.fio.encodeCellQnumb();
 		}
 	},
 	//---------------------------------------------------------
@@ -304,75 +336,74 @@
 					return ". ";
 				}
 			});
-		},
-
-		kanpenOpen: function() {
-			this.decodeCell(function(cell, ca) {
-				if (ca === "+") {
-					cell.qans = 1;
-				} else if (ca === "*") {
-					cell.qsub = 1;
-				} else if (ca === "5") {
-					cell.qnum = -2;
-				} else if (ca !== ".") {
-					cell.qnum = +ca;
-				}
-			});
-		},
-		kanpenSave: function() {
-			this.encodeCell(function(cell) {
-				if (cell.qans === 1) {
-					return "+ ";
-				} else if (cell.qsub === 1) {
-					return "* ";
-				} else if (cell.qnum >= 0) {
-					return cell.qnum + " ";
-				} else if (cell.qnum === -2) {
-					return "5 ";
-				} else {
-					return ". ";
-				}
-			});
-		},
-
-		kanpenOpenXML: function() {
-			this.decodeCellQnum_XMLBoard();
-			this.decodeCellAns_XMLAnswer();
-		},
-		kanpenSaveXML: function() {
-			this.encodeCellQnum_XMLBoard();
-			this.encodeCellAns_XMLAnswer();
-		},
-
-		UNDECIDED_NUM_XML: 5
+		}
 	},
 
 	//---------------------------------------------------------
 	// 正解判定処理実行部
 	AnsCheck: {
-		checklist: ["checkDir4Akari", "checkShinedCell"],
+		checklist: [
+			"checkDiag4Akari",
+			"checkOrthAdjacentAkari",
+			"checkShinedCell"
+		],
 
-		checkDir4Akari: function() {
-			this.checkDir4Cell(
-				function(cell) {
-					return cell.isAkari();
-				},
-				0,
-				"nmAkariNe"
-			);
+		/* Diagonal wall counting: numbered wall must have exactly N bulbs
+		   among its 4 diagonal neighbours */
+		checkDiag4Akari: function() {
+			var bd = this.board;
+			var dirs = [
+				[-2, -2],
+				[-2, 2],
+				[2, -2],
+				[2, 2]
+			];
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				if (cell.qnum < 0) {
+					continue;
+				}
+				var cnt = 0;
+				for (var d = 0; d < dirs.length; d++) {
+					var cell2 = bd.getc(cell.bx + dirs[d][0], cell.by + dirs[d][1]);
+					if (!cell2.isnull && cell2.isAkari()) {
+						cnt++;
+					}
+				}
+				if (cnt !== cell.qnum) {
+					cell.seterr(1);
+					return;
+				}
+			}
 		},
+
+		/* No two bulbs may be orthogonally adjacent */
+		checkOrthAdjacentAkari: function() {
+			var bd = this.board;
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				if (!cell.isAkari()) {
+					continue;
+				}
+				var dirs = [
+					[2, 0],
+					[0, 2]
+				]; /* only right & down to avoid double-count */
+				for (var d = 0; d < dirs.length; d++) {
+					var cell2 = bd.getc(cell.bx + dirs[d][0], cell.by + dirs[d][1]);
+					if (!cell2.isnull && cell2.isAkari()) {
+						cell.seterr(4);
+						cell2.seterr(4);
+						return;
+					}
+				}
+			}
+		},
+
 		checkShinedCell: function() {
 			this.checkAllCell(function(cell) {
-				return cell.noNum() && cell.qlight !== 1;
+				return cell.noNum() && !cell.isAkari() && cell.qlight !== 1;
 			}, "ceDark");
 		}
-	},
-
-	"Board@lightup2": {
-		customRules: [
-			"Diagonal illumination — lights shine along 4 diagonal rays until hitting a wall or edge (not orthogonal).",
-			"Diagonal wall counting — numbered walls count diagonally adjacent lights (not orthogonal neighbours).",
-			"No two bulbs orthogonally adjacent — lights cannot be placed in cells that share an edge."
-		]
 	}
 });

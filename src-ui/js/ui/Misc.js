@@ -100,6 +100,49 @@ ui.misc = {
 				}
 			}
 		});
+	},
+
+	customGameRules: {},
+
+	displayRules: function() {
+		var el = _doc.getElementById("rulespanel");
+		if (!el) { return; }
+
+		var pid = ui.puzzle.pid;
+		var rulesText = ui.rulesData[pid];
+		var custom = ui.puzzle.board.customRules;
+
+		if (!rulesText && !custom) {
+			el.style.display = "none";
+			return;
+		}
+
+		var html = "";
+
+		/* Standard rules from rules.en.yaml */
+		if (rulesText) {
+			html += "<h3>Rules</h3><ol>";
+			var lines = rulesText.split("\n");
+			for (var i = 0; i < lines.length; i++) {
+				var line = lines[i].replace(/^\d+\.\s*/, "").trim();
+				if (line.length > 0) {
+					html += "<li>" + line + "</li>";
+				}
+			}
+			html += "</ol>";
+		}
+
+		/* Custom gameplay rules (for modified variants) */
+		if (custom) {
+			html += "<h3>Custom Rules</h3><ol>";
+			for (var j = 0; j < custom.length; j++) {
+				html += "<li>" + custom[j] + "</li>";
+			}
+			html += "</ol>";
+		}
+
+		el.innerHTML = html;
+		el.style.display = "";
 	}
 };
 
@@ -152,6 +195,7 @@ function toBGimage(pid) {
 		"firewalk",
 		"forestwalk",
 		"geradeweg",
+		"hamlepaths",
 		"hasunomura",
 		"heteromino",
 		"heyapin",
