@@ -89,7 +89,7 @@ kurodoko: "This genre first appeared in Puzzle Communication Nikoli vol. 34."
 kurotto: "This genre first appeared in Puzzle Communication Nikoli vol. 138."
 kusabi: "This genre first appeared in Puzzle Communication Nikoli vol. 90."
 lightup: "This genre first appeared in Puzzle Communication Nikoli vol. 95."
-lits: "This genre first appeared in Puzzle Communication Nikoli vol. 104 under the name \"Nuruomino\"."
+lits: 'This genre first appeared in Puzzle Communication Nikoli vol. 104 under the name "Nuruomino".'
 lookair: "This genre first appeared in Puzzle Communication Nikoli vol. 136."
 loopsp: "This genre first appeared in Puzzle Communication Nikoli vol. 57."
 loute: "This genre first appeared in Puzzle Communication Nikoli vol. 133."
@@ -240,3 +240,4 @@ disco: This genre was invented by Inaba Naoki.
 nuriloop: This genre first appeared in Puzzle Communication Nikoli vol. 62.
 ruleofthree: This genre was invented by Seren.
 compass: This genre was invented by Silke Berendes.
+radiance: This genre was created as an original puzzle for ppbench.

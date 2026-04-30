@@ -463,6 +463,35 @@ nurikabe2:
     - "Left-click a cell to shade it"
     - "Right-click a cell to mark it as island (white)"
 
+radiance:
+  name: Radiance
+  base_type: radiance
+  interaction: mirror_placement
+  standard_rules:
+    R1: One emitter (dark square with arrow) fires a beam in the arrow's direction
+    R2: The beam travels in a straight line until it hits a mirror, target, or grid boundary
+    R3: Forward slash (/) deflects the beam — UP becomes RIGHT, RIGHT becomes UP, DOWN becomes LEFT, LEFT becomes DOWN
+    R4: Backslash (\) deflects the beam — UP becomes LEFT, LEFT becomes UP, DOWN becomes RIGHT, RIGHT becomes DOWN
+    R5: The beam must reach the red target (bullseye) after all reflections
+  custom_rules:
+    R6:
+      text: "All mirror slots must be used — the beam path must pass through every gray diamond on the grid"
+      type: solution_constraint
+      check: check_answer
+    R7:
+      text: "Each mirror slot must contain exactly one mirror (/ or \\) — no slot may be left empty"
+      type: solution_constraint
+      check: check_answer
+    R8:
+      text: "The beam terminates upon reaching the target — it does not continue past it"
+      type: solution_constraint
+      check: check_answer
+  controls:
+    - "Left-click a gray diamond to cycle: empty → / → \\ → empty"
+    - "Right-click to cycle in reverse: empty → \\ → / → empty"
+    - "Beam path updates in real-time as you place mirrors"
+    - "Green beam = reached target; Red beam = missed target"
+
 noribridge:
   name: Nori Bridge
   base_type: noribridge

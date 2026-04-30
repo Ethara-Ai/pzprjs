@@ -447,10 +447,10 @@
 					cell.ques = 2;
 				} else if (ca === "S") {
 					cell.ques = 3;
-				} else if (ca === "/") {
+				} else if (ca === "1") {
 					cell.ques = 3;
 					cell.qans = 31;
-				} else if (ca === "\\") {
+				} else if (ca === "2") {
 					cell.ques = 3;
 					cell.qans = 32;
 				}
@@ -463,8 +463,8 @@
 				} else if (cell.ques === 2) {
 					return "T ";
 				} else if (cell.ques === 3) {
-					if (cell.qans === 31) { return "/ "; }
-					if (cell.qans === 32) { return "\\ "; }
+					if (cell.qans === 31) { return "1 "; }
+					if (cell.qans === 32) { return "2 "; }
 					return "S ";
 				}
 				return ". ";
