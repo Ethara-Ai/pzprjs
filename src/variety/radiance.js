@@ -1,5 +1,20 @@
 //
-// パズル固有スクリプト部 光線版 radiance.js
+// Radiance - Beam Routing Puzzle (光線パズル)
+//
+// CORE MECHANIC:
+//   One emitter fires a beam. Player places mirrors (/ or \) on pre-marked
+//   slots to route the beam to a target. Every mirror slot must be used.
+//
+// ELEMENTS:
+//   - Emitter (ques=1, qdir): fires beam in arrow direction
+//   - Target (ques=2): beam must arrive here
+//   - Mirror slot (ques=3): player places / (qans=31) or \ (qans=32)
+//
+// VALIDATION:
+//   1. checkBeamReachesTarget - beam must arrive at target
+//   2. checkAllSlotsUsed     - every mirror slot must be traversed by beam
+//
+// GRID SIZE: 6x6 minimum, 12x12 maximum
 //
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
@@ -9,147 +24,192 @@
 	}
 })(["radiance"], {
 	//---------------------------------------------------------
-	// マウス入力系
+	// Mouse Input
+	//---------------------------------------------------------
 	MouseEvent: {
 		use: true,
 		inputModes: {
-			edit: ["number", "direc", "clear"],
-			play: ["slash", "unshade"]
+			edit: ["objplace", "clear"],
+			play: ["info-line"]
 		},
+
 		mouseinput_auto: function() {
 			if (this.puzzle.playmode) {
 				if (this.mousestart || this.mousemove) {
-					this.inputslash();
+					this.inputMirror();
 				} else if (this.mouseend && this.notInputted()) {
-					this.clickslash();
+					this.clickMirror();
 				}
 			} else if (this.puzzle.editmode) {
-				if (this.mousestart || this.mousemove) {
-					this.inputdirec();
-				} else if (this.mouseend && this.notInputted()) {
-					this.inputqnum();
-				}
-			}
-		},
-		mouseinput_other: function() {
-			if (this.inputMode === "slash") {
-				if (this.mousestart || this.mousemove) {
-					this.inputslash();
-				} else if (this.mouseend && this.notInputted()) {
-					this.clickslash();
+				if (this.mousestart) {
+					this.inputEditCell();
 				}
 			}
 		},
 
-		inputslash: function() {
+		// Edit mode: cycle cell type (empty -> emitter -> target -> mirror slot -> empty)
+		inputEditCell: function() {
 			var cell = this.getcell();
-			if (cell.isnull || cell.isEmitter()) {
-				return;
+			if (cell.isnull) { return; }
+
+			var current = cell.ques;
+			var next;
+			if (this.btn === "left") {
+				next = (current === 0) ? 1 : (current === 1) ? 2 : (current === 2) ? 3 : 0;
+			} else {
+				next = (current === 0) ? 3 : (current === 3) ? 2 : (current === 2) ? 1 : 0;
 			}
+
+			if (next === 0) {
+				cell.setQues(0);
+				cell.setQdir(0);
+				cell.setQans(0);
+			} else if (next === 1) {
+				cell.setQues(1);
+				cell.setQdir(4);
+				cell.setQans(0);
+			} else if (next === 2) {
+				cell.setQues(2);
+				cell.setQdir(0);
+				cell.setQans(0);
+			} else if (next === 3) {
+				cell.setQues(3);
+				cell.setQdir(0);
+				cell.setQans(0);
+			}
+			cell.draw();
+		},
+
+		// Drag-based mirror input on mirror slot cells only
+		inputMirror: function() {
+			var cell = this.getcell();
+			if (cell.isnull || cell.ques !== 3) { return; }
 
 			if (this.mouseCell !== cell) {
 				this.firstPoint.set(this.inputPoint);
 			} else if (this.firstPoint.bx !== null) {
-				var val = null,
-					dx = this.inputPoint.bx - this.firstPoint.bx,
-					dy = this.inputPoint.by - this.firstPoint.by;
+				var dx = this.inputPoint.bx - this.firstPoint.bx;
+				var dy = this.inputPoint.by - this.firstPoint.by;
+				var val = null;
+
 				if (dx * dy > 0 && Math.abs(dx) >= 0.5 && Math.abs(dy) >= 0.5) {
 					val = 31;
-				} else if (
-					dx * dy < 0 &&
-					Math.abs(dx) >= 0.5 &&
-					Math.abs(dy) >= 0.5
-				) {
+				} else if (dx * dy < 0 && Math.abs(dx) >= 0.5 && Math.abs(dy) >= 0.5) {
 					val = 32;
 				}
 
 				if (val !== null) {
 					if (this.inputData === null) {
-						if (val === cell.qans) {
-							val = 0;
-						}
+						if (val === cell.qans) { val = 0; }
 						this.inputData = +(val > 0);
 					} else if (this.inputData === 0) {
-						if (val === cell.qans) {
-							val = 0;
-						} else {
-							val = null;
-						}
+						if (val === cell.qans) { val = 0; } else { val = null; }
 					}
-					if (val !== null) {
+
+					if (val !== null && cell.qans !== val) {
 						cell.setQans(val);
-						cell.draw();
+						this.puzzle.redraw();
 					}
 					this.firstPoint.reset();
 				}
 			}
-
 			this.mouseCell = cell;
 		},
-		clickslash: function() {
+
+		// Click-based mirror toggle on mirror slot cells: empty -> / -> \ -> empty
+		clickMirror: function() {
 			var cell = this.getcell();
-			if (cell.isnull || cell.isEmitter()) {
-				return;
+			if (cell.isnull || cell.ques !== 3) { return; }
+
+			var current = cell.qans;
+			var next;
+			if (this.btn === "left") {
+				next = (current === 0) ? 31 : (current === 31) ? 32 : 0;
+			} else {
+				next = (current === 0) ? 32 : (current === 32) ? 31 : 0;
 			}
-
-			var qa = cell.qans;
-			cell.setQans(
-				(this.btn === "left"
-					? { 0: 31, 31: 32, 32: 0 }
-					: { 0: 32, 31: 0, 32: 31 })[qa]
-			);
-
-			cell.draw();
+			cell.setQans(next);
+			this.puzzle.redraw();
 		}
 	},
 
 	//---------------------------------------------------------
-	// キーボード入力系
+	// Keyboard Input
+	//---------------------------------------------------------
 	KeyEvent: {
 		enablemake: true,
-		moveTarget: function(ca) {
-			if (ca.match(/shift/)) {
-				return false;
-			}
-			return this.moveTCell(ca);
-		},
 
 		keyinput: function(ca) {
-			if (this.key_inputdirec(ca)) {
-				return;
+			if (this.keydown && this.puzzle.editmode) {
+				this.key_inputRadiance(ca);
 			}
-			this.key_inputqnum(ca);
+		},
+
+		key_inputRadiance: function(ca) {
+			var cell = this.cursor.getc();
+			if (cell.ques !== 1) { return; }
+
+			var dir = 0;
+			if (ca === "up") { dir = 1; }
+			else if (ca === "down") { dir = 2; }
+			else if (ca === "left") { dir = 3; }
+			else if (ca === "right") { dir = 4; }
+
+			if (dir > 0) {
+				cell.setQdir(dir);
+				cell.draw();
+			}
 		}
 	},
 
 	//---------------------------------------------------------
-	// 盤面管理系
+	// Cell Properties
+	//---------------------------------------------------------
 	Cell: {
-		minnum: 1,
-		maxnum: function() {
-			return (this.board.cols + this.board.rows) * 2;
+		isEmitter: function() {
+			return this.ques === 1;
 		},
 
-		isEmitter: function() {
-			return this.qnum !== -1 && this.qdir !== 0;
+		isTarget: function() {
+			return this.ques === 2;
+		},
+
+		isMirrorSlot: function() {
+			return this.ques === 3;
+		},
+
+		hasMirror: function() {
+			return this.qans === 31 || this.qans === 32;
 		},
 
 		noLP: function() {
-			return this.isEmitter();
+			return this.ques === 1 || this.ques === 2;
 		}
 	},
+
+	//---------------------------------------------------------
+	// Board Configuration
+	//---------------------------------------------------------
 	Board: {
-		cols: 7,
-		rows: 7,
+		cols: 8,
+		rows: 8,
 		disable_subclear: true
 	},
+
+	//---------------------------------------------------------
+	// Board Transformations
+	//---------------------------------------------------------
 	BoardExec: {
 		adjustBoardData: function(key, d) {
 			if (key & this.TURNFLIP) {
 				var clist = this.board.cell;
 				for (var i = 0; i < clist.length; i++) {
 					var cell = clist[i];
-					cell.qans = { 0: 0, 31: 32, 32: 31 }[cell.qans] || 0;
+					if (cell.qans === 31) {
+						cell.qans = 32;
+					} else if (cell.qans === 32) {
+						cell.qans = 31;
+					}
 				}
 			}
 			this.adjustNumberArrow(key, d);
@@ -157,248 +217,418 @@
 	},
 
 	//---------------------------------------------------------
-	// 画像表示系
+	// Graphics
+	//---------------------------------------------------------
 	Graphic: {
-		gridcolor_type: "DLIGHT",
-		numbercolor_func: "fixed",
-		errcolor1: "red",
-		errbcolor1: "rgb(255, 192, 192)",
+		hideHatena: true,
 
 		paint: function() {
 			this.drawBGCells();
 			this.drawGrid();
-
+			this.drawBeamPath();
 			this.drawSlashes();
-			this.drawEmitterCells();
-			this.drawArrowNumbers();
-
+			this.drawSpecialCells();
 			this.drawChassis();
 			this.drawTarget();
 		},
 
-		getBGCellColor: function(cell) {
-			if (cell.error === 1) {
-				return this.errbcolor1;
-			}
-			return null;
-		},
-
-		drawEmitterCells: function() {
-			var g = this.vinc("cell_emitter", "auto");
-
+		drawSpecialCells: function() {
+			var g = this.vinc("cell_special", "crz", true);
 			var clist = this.range.cells;
 			for (var i = 0; i < clist.length; i++) {
 				var cell = clist[i];
-				g.vid = "c_emit_" + cell.id;
+				g.vid = "c_sp_" + cell.id;
+
 				if (cell.isEmitter()) {
-					var px = cell.bx * this.bw,
-						py = cell.by * this.bh;
-					g.fillStyle = cell.error === 1
-						? this.errcolor1
-						: "rgb(32, 32, 32)";
-					g.fillRect(px - this.bw + 1, py - this.bh + 1, this.cw - 2, this.ch - 2);
+					var ecolor = (cell.error || cell.qinfo) ? this.errbcolor1 : "rgb(51,51,51)";
+					g.fillStyle = ecolor;
+					var px = cell.bx * this.bw;
+					var py = cell.by * this.bh;
+					var w = this.bw * 0.9;
+					var h = this.bh * 0.9;
+					g.fillRect(px - w, py - h, 2 * w, 2 * h);
+					this.drawArrowOnCell(g, cell, px, py);
+				} else if (cell.isTarget()) {
+					var tcolor = (cell.error || cell.qinfo) ? this.errbcolor1 : "rgb(220,50,50)";
+					g.fillStyle = tcolor;
+					var tpx = cell.bx * this.bw;
+					var tpy = cell.by * this.bh;
+					var tr = this.bw * 0.45;
+					g.beginPath();
+					g.arc(tpx, tpy, tr, 0, 2 * Math.PI, false);
+					g.fill();
+					g.fillStyle = "white";
+					g.beginPath();
+					g.arc(tpx, tpy, tr * 0.5, 0, 2 * Math.PI, false);
+					g.fill();
+				} else if (cell.isMirrorSlot() && !cell.hasMirror()) {
+					var spx = cell.bx * this.bw;
+					var spy = cell.by * this.bh;
+					var sr = this.bw * 0.35;
+					var scolor = (cell.error || cell.qinfo) ? this.errbcolor1 : "rgb(180,180,180)";
+					g.fillStyle = scolor;
+					g.beginPath();
+					g.moveTo(spx, spy - sr);
+					g.lineTo(spx + sr, spy);
+					g.lineTo(spx, spy + sr);
+					g.lineTo(spx - sr, spy);
+					g.closePath();
+					g.fill();
 				} else {
 					g.vhide();
 				}
 			}
+		},
+
+		drawArrowOnCell: function(g, cell, px, py) {
+			var dir = cell.qdir;
+			if (dir === 0) { return; }
+
+			g.strokeStyle = "white";
+			g.fillStyle = "white";
+			g.lineWidth = Math.max(1, this.bw * 0.1) | 0;
+
+			var len = this.bw * 0.55;
+			var head = this.bw * 0.25;
+			var dx = 0;
+			var dy = 0;
+
+			if (dir === 1) { dy = -1; }
+			else if (dir === 2) { dy = 1; }
+			else if (dir === 3) { dx = -1; }
+			else if (dir === 4) { dx = 1; }
+
+			g.beginPath();
+			g.moveTo(px - dx * len * 0.5, py - dy * len * 0.5);
+			g.lineTo(px + dx * len * 0.5, py + dy * len * 0.5);
+			g.stroke();
+
+			var tipX = px + dx * len * 0.5;
+			var tipY = py + dy * len * 0.5;
+			g.beginPath();
+			g.moveTo(tipX, tipY);
+			if (dx !== 0) {
+				g.lineTo(tipX - dx * head, tipY - head * 0.5);
+				g.lineTo(tipX - dx * head, tipY + head * 0.5);
+			} else {
+				g.lineTo(tipX - head * 0.5, tipY - dy * head);
+				g.lineTo(tipX + head * 0.5, tipY - dy * head);
+			}
+			g.closePath();
+			g.fill();
+		},
+
+		drawBeamPath: function() {
+			var g = this.vinc("cell_beam", "auto");
+			var bd = this.board;
+			g.vid = "c_beam_path";
+			g.lineWidth = Math.max(2, this.bw * 0.15) | 0;
+
+			var emitter = null;
+			for (var c = 0; c < bd.cell.length; c++) {
+				if (bd.cell[c].isEmitter()) {
+					emitter = bd.cell[c];
+					break;
+				}
+			}
+
+			if (!emitter) { g.vhide(); return; }
+
+			var segments = this.traceBeamVisual(emitter);
+			if (segments.length === 0) { g.vhide(); return; }
+
+			var lastCell = segments[segments.length - 1].cell;
+			var reachedTarget = (lastCell && lastCell.isTarget());
+			g.strokeStyle = reachedTarget ? "rgba(34,180,34,0.7)" : "rgba(200,80,50,0.6)";
+
+			g.beginPath();
+			var sx = emitter.bx * this.bw;
+			var sy = emitter.by * this.bh;
+			g.moveTo(sx, sy);
+			for (var i = 0; i < segments.length; i++) {
+				g.lineTo(segments[i].x, segments[i].y);
+			}
+			g.stroke();
+		},
+
+		traceBeamVisual: function(emitter) {
+			var dir = emitter.qdir;
+			var segments = [];
+			var pos = emitter.getaddr();
+			var maxSteps = (this.board.cols + this.board.rows) * 4;
+			var visited = {};
+
+			for (var step = 0; step < maxSteps; step++) {
+				pos.movedir(dir, 2);
+				var cell = pos.getc();
+
+				if (cell.isnull) { break; }
+
+				segments.push({
+					x: cell.bx * this.bw,
+					y: cell.by * this.bh,
+					cell: cell
+				});
+
+				if (cell.isTarget()) { break; }
+				if (cell.isEmitter()) { break; }
+
+				if (cell.hasMirror()) {
+					if (cell.qans === 31) {
+						dir = [0, 4, 3, 2, 1][dir];
+					} else {
+						dir = [0, 3, 4, 1, 2][dir];
+					}
+				}
+
+				var key = cell.id + "_" + dir;
+				if (visited[key]) { break; }
+				visited[key] = true;
+			}
+			return segments;
 		}
 	},
 
 	//---------------------------------------------------------
-	// URLエンコード/デコード処理
+	// URL Encode/Decode
+	//---------------------------------------------------------
 	Encode: {
 		decodePzpr: function(type) {
-			this.decodeArrowNumber16();
+			this.decodeRadiance();
 		},
 		encodePzpr: function(type) {
-			this.encodeArrowNumber16();
+			this.encodeRadiance();
+		},
+
+		decodeRadiance: function() {
+			var bstr = this.outbstr;
+			var bd = this.board;
+			var c = 0;
+			var i = 0;
+
+			while (i < bstr.length && c < bd.cell.length) {
+				var ch = bstr.charAt(i);
+
+				if (ch === "1") {
+					i++;
+					var dir = parseInt(bstr.charAt(i), 10);
+					bd.cell[c].ques = 1;
+					bd.cell[c].qdir = dir;
+					c++;
+				} else if (ch === "2") {
+					bd.cell[c].ques = 2;
+					c++;
+				} else if (ch === "3") {
+					bd.cell[c].ques = 3;
+					c++;
+				} else if (ch >= "a" && ch <= "z") {
+					c += (ch.charCodeAt(0) - 96);
+				}
+				i++;
+			}
+			this.outbstr = bstr.substring(i);
+		},
+
+		encodeRadiance: function() {
+			var bd = this.board;
+			var cm = "";
+			var empty = 0;
+
+			for (var c = 0; c < bd.cell.length; c++) {
+				var cell = bd.cell[c];
+				if (cell.ques === 1) {
+					if (empty > 0) {
+						cm += String.fromCharCode(96 + empty);
+						empty = 0;
+					}
+					cm += "1" + cell.qdir;
+				} else if (cell.ques === 2) {
+					if (empty > 0) {
+						cm += String.fromCharCode(96 + empty);
+						empty = 0;
+					}
+					cm += "2";
+				} else if (cell.ques === 3) {
+					if (empty > 0) {
+						cm += String.fromCharCode(96 + empty);
+						empty = 0;
+					}
+					cm += "3";
+				} else {
+					empty++;
+					if (empty >= 26) {
+						cm += "z";
+						empty = 0;
+					}
+				}
+			}
+			if (empty > 0) {
+				cm += String.fromCharCode(96 + empty);
+			}
+			this.outbstr += cm;
 		}
 	},
+
+	//---------------------------------------------------------
+	// File I/O
 	//---------------------------------------------------------
 	FileIO: {
 		decodeData: function() {
-			this.decodeCellDirecQnum();
 			this.decodeCell(function(cell, ca) {
-				if (ca === "1") {
+				if (ca.charAt(0) === "E") {
+					cell.ques = 1;
+					cell.qdir = parseInt(ca.charAt(1), 10);
+				} else if (ca === "T") {
+					cell.ques = 2;
+				} else if (ca === "S") {
+					cell.ques = 3;
+				} else if (ca === "/") {
+					cell.ques = 3;
 					cell.qans = 31;
-				} else if (ca === "2") {
+				} else if (ca === "\\") {
+					cell.ques = 3;
 					cell.qans = 32;
 				}
 			});
 		},
 		encodeData: function() {
-			this.encodeCellDirecQnum();
 			this.encodeCell(function(cell) {
-				if (cell.qans === 31) {
-					return "1 ";
-				} else if (cell.qans === 32) {
-					return "2 ";
-				} else {
-					return ". ";
+				if (cell.ques === 1) {
+					return "E" + cell.qdir + " ";
+				} else if (cell.ques === 2) {
+					return "T ";
+				} else if (cell.ques === 3) {
+					if (cell.qans === 31) { return "/ "; }
+					if (cell.qans === 32) { return "\\ "; }
+					return "S ";
 				}
+				return ". ";
 			});
 		}
 	},
 
 	//---------------------------------------------------------
-	// 正解判定処理実行部
+	// Answer Verification
+	//---------------------------------------------------------
 	AnsCheck: {
 		checklist: [
-			"checkBeamLengths",
-			"checkNoCrossBeams",
-			"checkFullCoverage",
-			"checkUnusedMirrors"
+			"checkGridSize",
+			"checkBeamReachesTarget",
+			"checkAllSlotsUsed"
 		],
 
-		// Beam deflection: traces from emitter through cells, bouncing off at most one mirror
-		traceBeam: function(emitter) {
-			var dir = emitter.qdir; // UP=1, DN=2, LT=3, RT=4
-			var cells = [];
-			var pos = emitter.getaddr();
-			var bounced = false;
+		checkGridSize: function() {
+			var bd = this.board;
+			if (bd.cols < 6 || bd.rows < 6 || bd.cols > 12 || bd.rows > 12) {
+				this.failcode.add("rdGridSize");
+			}
+		},
 
-			while (true) {
+		checkBeamReachesTarget: function() {
+			var bd = this.board;
+			var emitter = null;
+			var target = null;
+
+			for (var c = 0; c < bd.cell.length; c++) {
+				if (bd.cell[c].isEmitter()) { emitter = bd.cell[c]; }
+				if (bd.cell[c].isTarget()) { target = bd.cell[c]; }
+			}
+
+			if (!emitter || !target) {
+				this.failcode.add("rdMissedTarget");
+				return;
+			}
+
+			var path = this.traceBeam(emitter);
+			this._beamPath = path;
+
+			var reached = false;
+			for (var i = 0; i < path.length; i++) {
+				if (path[i] === target) {
+					reached = true;
+					break;
+				}
+			}
+
+			if (!reached) {
+				this.failcode.add("rdMissedTarget");
+				if (this.checkOnly) { return; }
+				emitter.seterr(1);
+				target.seterr(1);
+			}
+		},
+
+		checkAllSlotsUsed: function() {
+			var bd = this.board;
+			var path = this._beamPath;
+
+			if (!path) {
+				var emitter = null;
+				for (var c = 0; c < bd.cell.length; c++) {
+					if (bd.cell[c].isEmitter()) { emitter = bd.cell[c]; break; }
+				}
+				if (!emitter) { return; }
+				path = this.traceBeam(emitter);
+			}
+
+			var visited = {};
+			for (var i = 0; i < path.length; i++) {
+				visited[path[i].id] = true;
+			}
+
+			for (var c2 = 0; c2 < bd.cell.length; c2++) {
+				var cell = bd.cell[c2];
+				if (cell.isMirrorSlot() && !visited[cell.id]) {
+					this.failcode.add("rdSlotSkipped");
+					if (this.checkOnly) { return; }
+					cell.seterr(1);
+				}
+			}
+		},
+
+		traceBeam: function(emitter) {
+			var dir = emitter.qdir;
+			var path = [];
+			var pos = emitter.getaddr();
+			var maxSteps = (this.board.cols + this.board.rows) * 4;
+			var visited = {};
+
+			for (var step = 0; step < maxSteps; step++) {
 				pos.movedir(dir, 2);
 				var cell = pos.getc();
 
-				if (cell.isnull || cell.isEmitter()) {
-					break;
+				if (cell.isnull) { break; }
+				if (cell.isEmitter()) { break; }
+
+				path.push(cell);
+
+				if (cell.isTarget()) { break; }
+
+				if (cell.hasMirror()) {
+					dir = this.reflectDirection(dir, cell.qans);
 				}
 
-				if (cell.qans === 31 || cell.qans === 32) {
-					if (bounced) {
-						break;
-					}
-					cells.push(cell);
-					bounced = true;
-
-					// Forward slash: RT<->UP, LT<->DN
-					if (cell.qans === 31) {
-						if (dir === 4) { dir = 1; }
-						else if (dir === 1) { dir = 4; }
-						else if (dir === 3) { dir = 2; }
-						else if (dir === 2) { dir = 3; }
-					}
-					// Backslash: RT<->DN, LT<->UP
-					else if (cell.qans === 32) {
-						if (dir === 4) { dir = 2; }
-						else if (dir === 2) { dir = 4; }
-						else if (dir === 3) { dir = 1; }
-						else if (dir === 1) { dir = 3; }
-					}
-				} else {
-					cells.push(cell);
-				}
+				var key = cell.id + "_" + dir;
+				if (visited[key]) { break; }
+				visited[key] = true;
 			}
-			return cells;
+			return path;
 		},
 
-		getEmitters: function() {
-			var emitters = [];
-			var bd = this.board;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				if (cell.isEmitter()) {
-					emitters.push(cell);
-				}
+		reflectDirection: function(dir, mirrorType) {
+			if (mirrorType === 31) {
+				return [0, 4, 3, 2, 1][dir];
 			}
-			return emitters;
-		},
-
-		checkBeamLengths: function() {
-			var emitters = this.getEmitters();
-			for (var i = 0; i < emitters.length; i++) {
-				var emitter = emitters[i];
-				var beamCells = this.traceBeam(emitter);
-				if (beamCells.length !== emitter.qnum) {
-					this.failcode.add("bkLenNe");
-					if (this.checkOnly) {
-						break;
-					}
-					emitter.seterr(1);
-					for (var j = 0; j < beamCells.length; j++) {
-						beamCells[j].seterr(1);
-					}
-				}
-			}
-		},
-
-		checkNoCrossBeams: function() {
-			var emitters = this.getEmitters();
-			var illuminated = {};
-
-			for (var i = 0; i < emitters.length; i++) {
-				var beamCells = this.traceBeam(emitters[i]);
-				for (var j = 0; j < beamCells.length; j++) {
-					var cell = beamCells[j];
-					if (illuminated[cell.id]) {
-						this.failcode.add("cuDouble");
-						if (this.checkOnly) {
-							return;
-						}
-						cell.seterr(1);
-					}
-					illuminated[cell.id] = true;
-				}
-			}
-		},
-
-		checkFullCoverage: function() {
-			var emitters = this.getEmitters();
-			var illuminated = {};
-
-			for (var i = 0; i < emitters.length; i++) {
-				var beamCells = this.traceBeam(emitters[i]);
-				for (var j = 0; j < beamCells.length; j++) {
-					illuminated[beamCells[j].id] = true;
-				}
-			}
-
-			var bd = this.board;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				if (cell.isEmitter()) {
-					continue;
-				}
-				if (!illuminated[cell.id]) {
-					this.failcode.add("cuNoBeam");
-					if (this.checkOnly) {
-						break;
-					}
-					cell.seterr(1);
-				}
-			}
-		},
-
-		checkUnusedMirrors: function() {
-			var emitters = this.getEmitters();
-			var illuminated = {};
-
-			for (var i = 0; i < emitters.length; i++) {
-				var beamCells = this.traceBeam(emitters[i]);
-				for (var j = 0; j < beamCells.length; j++) {
-					illuminated[beamCells[j].id] = true;
-				}
-			}
-
-			var bd = this.board;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				if ((cell.qans === 31 || cell.qans === 32) && !illuminated[cell.id]) {
-					this.failcode.add("mrUnused");
-					if (this.checkOnly) {
-						break;
-					}
-					cell.seterr(1);
-				}
-			}
+			return [0, 3, 4, 1, 2][dir];
 		}
 	},
 
+	//---------------------------------------------------------
+	// Failcode Mapping
+	//---------------------------------------------------------
 	FailCode: {
-		bkLenNe: "bkLenNe.radiance",
-		cuDouble: "cuDouble.radiance",
-		cuNoBeam: "cuNoBeam.radiance",
-		mrUnused: "mrUnused.radiance"
+		rdGridSize: "rdGridSize.radiance",
+		rdMissedTarget: "rdMissedTarget.radiance",
+		rdSlotSkipped: "rdSlotSkipped.radiance"
 	}
 });
