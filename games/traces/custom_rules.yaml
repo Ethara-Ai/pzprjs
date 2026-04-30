@@ -492,6 +492,35 @@ radiance:
     - "Beam path updates in real-time as you place mirrors"
     - "Green beam = reached target; Red beam = missed target"
 
+resonance:
+  name: Resonance
+  base_type: resonance
+  interaction: object_placement
+  standard_rules:
+    R1: Each emitter broadcasts a signal that decays by Manhattan distance — strength at distance d = max(0, value - d)
+    R2: Signals from multiple emitters are additive — each cell receives the sum of all signals reaching it
+    R3: Each clue cell must receive exactly its stated total signal value
+    R4: Each region contains at most one emitter
+    R5: No two emitters may be orthogonally adjacent
+  custom_rules:
+    R6:
+      text: "Emitter values are restricted to 1, 2, or 3"
+      type: solution_constraint
+      check: check_answer
+    R7:
+      text: "Emitters may only be placed on non-clue cells"
+      type: solution_constraint
+      check: check_answer
+    R8:
+      text: "The puzzle has exactly one valid solution"
+      type: solution_constraint
+      check: check_answer
+  controls:
+    - "Left-click an empty cell to cycle emitter value: 1 → 2 → 3 → empty"
+    - "Right-click to cycle in reverse: empty → 3 → 2 → 1"
+    - "Clue cells (numbered) cannot be modified"
+    - "Green background = clue satisfied; Red background = clue violated"
+
 noribridge:
   name: Nori Bridge
   base_type: noribridge

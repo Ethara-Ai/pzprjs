@@ -374,6 +374,7 @@
 			railpool: [0, 0, "Rail Pool", "Rail Pool"],
 			rassi: [0, 0, "Rassi Silai", "Rassi Silai", "country"],
 			recoil: [0, 0, "Recoil", "Recoil"],
+			resonance: [0, 0, "レゾナンス", "Resonance"],
 			rectslider: [0, 0, "四角スライダー", "Rectangle-Slider", "bonsan"],
 			reflect: [1, 0, "リフレクトリンク", "Reflect Link"],
 			"regional-poly": [

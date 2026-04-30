@@ -29,6 +29,7 @@ GAME_REGISTRY = [
     ("kshitiz/play_nurikabe.py", "play_nurikabe", "generate_custom_nurikabe", "nurikabe"),
     ("kshitiz/play_nurikabe2.py", "play_nurikabe2", "generate_custom_nurikabe2", "nurikabe2"),
     ("shabid/nori_bridge.py", "nori_bridge", "generate_puzzle_nori_bridges2", "noribridge"),
+    ("shabid/puzzle_resonance.py", "puzzle_resonance", "generate_puzzle_resonance", "resonance"),
 ]
 
 DIFFICULTIES = ["easy", "medium", "hard"]
