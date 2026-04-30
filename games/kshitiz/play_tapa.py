@@ -5,19 +5,19 @@ from datetime import datetime, timezone
 
 _PUZZLES = {
     "easy": {
-        "rows": 5,
-        "cols": 5,
-        "url_body": "k2i4h4j1k2g",
+        "rows": 3,
+        "cols": 3,
+        "url_body": "2h3k",
     },
     "medium": {
-        "rows": 6,
-        "cols": 6,
-        "url_body": "mabh8o6ja7i2h3i",
+        "rows": 3,
+        "cols": 4,
+        "url_body": "j4i2i",
     },
     "hard": {
-        "rows": 7,
-        "cols": 7,
-        "url_body": "j31g5g8ha8n5u5habj3i",
+        "rows": 4,
+        "cols": 3,
+        "url_body": "h2n2",
     },
 }
 
@@ -133,49 +133,60 @@ def _solve_tapa(grid, rows, cols):
         actual = sorted(runs)
         return actual == expected
 
-    def _check_no_2x2_shaded(r, c):
+    def _check_no_2x2_unshaded(r, c):
         for dr in range(0, -2, -1):
             for dc in range(0, -2, -1):
                 tr, tc = r + dr, c + dc
                 if tr < 0 or tc < 0 or tr + 1 >= rows or tc + 1 >= cols:
                     continue
-                all_shaded = True
+                all_unshaded = True
                 for rr in range(tr, tr + 2):
                     for cc in range(tc, tc + 2):
                         if grid[rr][cc] is not None:
-                            all_shaded = False
+                            pass  # clue cell counts as unshaded
+                        elif sol[rr][cc] == 1:
+                            all_unshaded = False
                             break
-                        if sol[rr][cc] != 1:
-                            all_shaded = False
-                            break
-                    if not all_shaded:
+                    if not all_unshaded:
                         break
-                if all_shaded:
+                if all_unshaded:
                     return False
         return True
 
-    def _check_connectivity():
-        shaded_cells = set()
+    def _check_unshaded_connected():
+        unshaded_cells = set()
         for r in range(rows):
             for c in range(cols):
-                if grid[r][c] is None and sol[r][c] == 1:
-                    shaded_cells.add((r, c))
+                if grid[r][c] is not None:
+                    unshaded_cells.add((r, c))
+                elif sol[r][c] == 0:
+                    unshaded_cells.add((r, c))
 
-        if not shaded_cells:
+        if not unshaded_cells:
             return True
 
-        start = next(iter(shaded_cells))
+        start = next(iter(unshaded_cells))
         visited = {start}
         queue = [start]
         while queue:
             cr, cc = queue.pop()
             for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 nr, nc = cr + dr, cc + dc
-                if (nr, nc) in shaded_cells and (nr, nc) not in visited:
+                if (nr, nc) in unshaded_cells and (nr, nc) not in visited:
                     visited.add((nr, nc))
                     queue.append((nr, nc))
 
-        return len(visited) == len(shaded_cells)
+        return len(visited) == len(unshaded_cells)
+
+    def _check_row_majority():
+        for r in range(rows):
+            shaded = 0
+            for c in range(cols):
+                if grid[r][c] is None and sol[r][c] == 1:
+                    shaded += 1
+            if shaded <= cols - shaded:
+                return False
+        return True
 
     def _partial_clue_ok(r, c):
         result = _check_clue(r, c)
@@ -194,11 +205,19 @@ def _solve_tapa(grid, rows, cols):
 
     def solve(idx):
         if idx == len(empty_cells):
-            if not _check_connectivity():
+            if not _check_row_majority():
+                return False
+            if not _check_unshaded_connected():
                 return False
             for cr, cc in clue_positions:
                 if not _check_clue(cr, cc):
                     return False
+            shaded = sum(
+                1 for r in range(rows) for c in range(cols)
+                if grid[r][c] is None and sol[r][c] == 1
+            )
+            if shaded == 0:
+                return False
             return True
 
         r, c = empty_cells[idx]
@@ -206,7 +225,7 @@ def _solve_tapa(grid, rows, cols):
         for val in (1, 0):
             sol[r][c] = val
 
-            if val == 1 and not _check_no_2x2_shaded(r, c):
+            if val == 0 and not _check_no_2x2_unshaded(r, c):
                 sol[r][c] = -1
                 continue
 
@@ -271,15 +290,15 @@ def generate_custom_tapa(difficulty="easy"):
         moves = {"moves_full": [], "moves_required": [], "moves_hint": []}
 
     return {
-        "puzzle_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
-        "pid": "tapa",
+        "puzzle_url": f"http://localhost:8000/p.html?tapa_custom/{cols}/{rows}/{url_body}",
+        "pid": "tapa_custom",
         "sort_key": None,
         "width": cols,
         "height": rows,
         "area": rows * cols,
         "number_required_moves": len(moves["moves_required"]),
         "number_total_solution_moves": len(moves["moves_full"]),
-        "puzzlink_url": f"http://localhost:8000/p.html?tapa/{cols}/{rows}/{url_body}",
+        "puzzlink_url": f"http://localhost:8000/p.html?tapa_custom/{cols}/{rows}/{url_body}",
         "source": {
             "site_name": "custom_generated",
             "page_url": None,

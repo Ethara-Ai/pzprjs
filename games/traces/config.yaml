@@ -1,0 +1,26 @@
+output_dir: "runs"
+
+concurrency: 5
+max_retries: 3
+
+models:
+  - "anthropic/claude-sonnet-4-6"
+  # - "openai/gpt-4o"
+  # - "anthropic/claude-opus-4-6"
+  # - "google/gemini-3-pro"
+  # - "xai/grok-4-1-fast"
+
+games:
+  # Leave empty or omit to run all 20 game types x 3 difficulties = 60 puzzles
+  # Uncomment specific PIDs to run only those:
+  # - sudoku
+  # - sudoku2
+  # - heyawake
+  # - mines
+  # - country
+
+difficulties:
+  # Leave empty or omit to run all 3
+  # - easy
+  # - medium
+  # - hard

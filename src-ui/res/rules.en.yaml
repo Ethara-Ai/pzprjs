@@ -473,3 +473,10 @@ bwloop: |-
   1. The loop cannot branch off or cross itself.
   2. Between two successively passed circles of the same color, the loop must not turn.
   3. Between two successively passed circles of different colors, the loop must turn exactly once.
+pairloop: |-
+  Draw lines along the edges of some cells to form a single closed loop.
+  1. The loop cannot branch off or cross itself.
+  2. Number clues (0–4): exactly that many of the cell's 4 borders are part of the loop.
+  3. Arrow clues (↑→↓←): the cell's border in the arrow direction AND the adjacent cell's border in that same direction must both be loop segments (extended reach — 2 consecutive lines).
+  4. A cell contains either a number clue or an arrow clue, never both.
+  5. Cells without clues have no constraints on their borders.

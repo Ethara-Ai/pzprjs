@@ -1005,11 +1005,17 @@
 
 		checkMaxShadedRowCol: function() {
 			var maxshade = this.puzzle.getConfig("yajilin_maxshade");
-			if (!maxshade) {
+			if (maxshade === 0) {
 				return;
 			}
 
 			var bd = this.board;
+			if (maxshade < 0) {
+				var h = bd.rows;
+				var w = bd.cols;
+				maxshade = Math.ceil(Math.min(h, w) / 2);
+			}
+
 			var x = [],
 				y = [];
 			for (var i = bd.minbx; i <= bd.maxbx; i++) {

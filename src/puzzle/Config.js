@@ -129,18 +129,18 @@
 			variant: true,
 			volatile: true
 		}); /* lits: Disable same-shape adjacency ban */
-		this.add("yajilin_out", false, {
+		this.add("yajilin_out", true, {
 			variant: true,
 			volatile: true
 		}); /* yajilin: All shaded cells are outside the loop */
-		this.add("yajilin_diagonal", false, {
+		this.add("yajilin_diagonal", true, {
 			variant: true,
 			volatile: true
 		}); /* yajilin: No diagonally adjacent shaded cells */
-		this.add("yajilin_maxshade", 0, {
+		this.add("yajilin_maxshade", -1, {
 			variant: true,
 			volatile: true
-		}); /* yajilin: Max shaded cells per row/column (0=disabled) */
+		}); /* yajilin: Max shaded cells per row/column (-1=auto: ceil(min(h,w)/2), 0=disabled) */
 			this.add("koburin_minesweeper", false, {
 				variant: true,
 				volatile: true
