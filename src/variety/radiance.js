@@ -1,21 +1,5 @@
-//
-// Radiance - Beam Routing Puzzle (光線パズル)
-//
-// CORE MECHANIC:
-//   One emitter fires a beam. Player places mirrors (/ or \) on pre-marked
-//   slots to route the beam to a target. Every mirror slot must be used.
-//
-// ELEMENTS:
-//   - Emitter (ques=1, qdir): fires beam in arrow direction
-//   - Target (ques=2): beam must arrive here
-//   - Mirror slot (ques=3): player places / (qans=31) or \ (qans=32)
-//
-// VALIDATION:
-//   1. checkBeamReachesTarget - beam must arrive at target
-//   2. checkAllSlotsUsed     - every mirror slot must be traversed by beam
-//
-// GRID SIZE: 6x6 minimum, 12x12 maximum
-//
+
+
 (function(pidlist, classbase) {
 	if (typeof module === "object" && module.exports) {
 		module.exports = [pidlist, classbase];
@@ -23,9 +7,7 @@
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
 })(["radiance"], {
-	//---------------------------------------------------------
-	// Mouse Input
-	//---------------------------------------------------------
+
 	MouseEvent: {
 		use: true,
 		inputModes: {
@@ -47,7 +29,7 @@
 			}
 		},
 
-		// Edit mode: cycle cell type (empty -> emitter -> target -> mirror slot -> empty)
+	
 		inputEditCell: function() {
 			var cell = this.getcell();
 			if (cell.isnull) { return; }
@@ -80,7 +62,6 @@
 			cell.draw();
 		},
 
-		// Drag-based mirror input on mirror slot cells only
 		inputMirror: function() {
 			var cell = this.getcell();
 			if (cell.isnull || cell.ques !== 3) { return; }
@@ -116,7 +97,7 @@
 			this.mouseCell = cell;
 		},
 
-		// Click-based mirror toggle on mirror slot cells: empty -> / -> \ -> empty
+
 		clickMirror: function() {
 			var cell = this.getcell();
 			if (cell.isnull || cell.ques !== 3) { return; }
@@ -133,9 +114,7 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Keyboard Input
-	//---------------------------------------------------------
+
 	KeyEvent: {
 		enablemake: true,
 
@@ -162,9 +141,6 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Cell Properties
-	//---------------------------------------------------------
 	Cell: {
 		isEmitter: function() {
 			return this.ques === 1;
@@ -187,18 +163,14 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Board Configuration
-	//---------------------------------------------------------
+
 	Board: {
 		cols: 8,
 		rows: 8,
 		disable_subclear: true
 	},
 
-	//---------------------------------------------------------
-	// Board Transformations
-	//---------------------------------------------------------
+
 	BoardExec: {
 		adjustBoardData: function(key, d) {
 			if (key & this.TURNFLIP) {
@@ -216,9 +188,7 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Graphics
-	//---------------------------------------------------------
+
 	Graphic: {
 		hideHatena: true,
 
@@ -389,9 +359,6 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// URL Encode/Decode
-	//---------------------------------------------------------
 	Encode: {
 		decodePzpr: function(type) {
 			this.decodeRadiance();
@@ -469,9 +436,7 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// File I/O
-	//---------------------------------------------------------
+
 	FileIO: {
 		decodeData: function() {
 			this.decodeCell(function(cell, ca) {
@@ -507,9 +472,6 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Answer Verification
-	//---------------------------------------------------------
 	AnsCheck: {
 		checklist: [
 			"checkGridSize",
@@ -623,9 +585,7 @@
 		}
 	},
 
-	//---------------------------------------------------------
-	// Failcode Mapping
-	//---------------------------------------------------------
+	
 	FailCode: {
 		rdGridSize: "rdGridSize.radiance",
 		rdMissedTarget: "rdMissedTarget.radiance",
