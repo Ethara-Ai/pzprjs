@@ -972,8 +972,13 @@
   "brDegreeOver.noribridge": "数字のある部屋の橋の数が多すぎます。",
   "brDegreeUnder.noribridge": "数字のある部屋の橋の数が少なすぎます。",
   "brDisconnected.noribridge": "すべての部屋が橋でつながっていません。",
-
   "rdGridSize.radiance": "グリッドサイズは6×6以上12×12以下でなければなりません。",
   "rdMissedTarget.radiance": "ビームがターゲットに届いていません。",
-  "rdSlotSkipped.radiance": "ビームが通過していないミラースロットがあります。"
+  "rdSlotSkipped.radiance": "ビームが通過していないミラースロットがあります。",
+  "arExtReach.pairloop": "矢印の方向に連続する線が2本ありません。",
+  "bkNotLine": "白マスのシマが直線になっていません。",
+  "csGt3": "３マスより大きい黒マスのカタマリがあります。",
+  "nmLineNe.pairloop": "数字の周りにある線の本数が違います。",
+  "ppVertexParity.paritypipes": "頂点の状態が色と一致しません（黒=ループ通過、白=ループ非通過）。",
+  "tpDepthNe.tidepool": "数字がその白マスの境界までのBFS距離と一致しません。"
 }

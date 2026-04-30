@@ -474,6 +474,7 @@
 			tateyoko: [1, 0, "タテボーヨコボー", "Tatebo-Yokobo"],
 			tawa: [0, 0, "たわむれんが", "Tawamurenga"],
 			tentaisho: [0, 0, "天体ショー", "Tentaisho"],
+			tidepool: [0, 0, "タイドプール", "Tidepool"],
 			tents: [0, 0, "Tents", "Tents", "tents"],
 			teri: [0, 0, "テリトリー", "Territory", "kurodoko"],
 			tetrochain: [0, 0, "テトロチェーンＹ", "Tetro Chain-Y"],
