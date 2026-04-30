@@ -297,3 +297,7 @@ See [`data/22-23 april/rules.md`](data/22-23%20april/rules.md) for the complete 
 
 - pzprjs: MIT (fork of [sabo2/pzprjs](https://github.com/sabo2/pzprjs))
 - cspuz_core: See cspuz_core/LICENSE (from [semiexp/cspuz_core](https://github.com/semiexp/cspuz_core))
+
+
+# From your pzprjs directory (after npm run build):
+cp -r dist/* /Users/apple/Desktop/morpheus/pencil-puzzle-bench/ppbench/vendor/pzprjs/dist/
