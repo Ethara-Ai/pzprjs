@@ -1,467 +1,33 @@
-sudoku:
-  name: Sudoku
-  base_type: sudoku
-  interaction: number_entry
-  standard_rules:
-    R1: Fill every empty cell with a digit from 1-9
-    R2: Each row must contain all digits 1-9 exactly once
-    R3: Each column must contain all digits 1-9 exactly once
-    R4: Each 3x3 box (9 thick-bordered regions) must contain all digits 1-9 exactly once
-    R5: Pre-filled digits (clues) cannot be changed
-  custom_rules:
-    R6:
-      text: "No consecutive same input -- you cannot enter the same digit twice in a row"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Killer cage -- a random 3x3 region is highlighted with a red dashed border and a target sum. The digits in that cage must sum to the target number"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Digit parity alternation -- if you enter an odd digit, your next digit must be even, and vice versa. Deadlock bypass: if no remaining empty cell can legally accept an opposite-parity digit, same-parity input is allowed"
-      type: move_ordering
-      check: runtime
-  controls:
-    - "Click a cell, then type a digit (1-9) to place it"
-    - "Arrow keys to navigate between cells"
-
-sudoku2:
-  name: Sudoku 2
-  base_type: sudoku
-  interaction: number_entry
-  standard_rules:
-    R1: Fill every empty cell with a digit from 1-9
-    R2: Each row must contain all digits 1-9 exactly once
-    R3: Each column must contain all digits 1-9 exactly once
-    R4: Each 3x3 box must contain all digits 1-9 exactly once
-    R5: Pre-filled digits (clues) cannot be changed
-  custom_rules:
-    R6:
-      text: "Row alternation -- consecutive entries must be placed in different rows. Deadlock bypass: if every remaining empty cell is in the same row, same-row input is allowed"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Box alternation -- consecutive entries must be placed in different 3x3 boxes. Deadlock bypass: if every remaining empty cell is in the same box, same-box input is allowed"
-      type: move_ordering
-      check: runtime
-    R8:
-      text: "Even-digit balance -- every row must contain exactly 4 even digits (2, 4, 6, 8)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Click a cell, then type a digit (1-9) to place it"
-    - "Arrow keys to navigate between cells"
-
-heyawake:
-  name: Heyawake
-  base_type: heyawake
+tidepool:
+  name: Tidepool
+  base_type: tidepool
   interaction: cell_shading
   standard_rules:
-    R1: "No adjacent shading (relaxed) -- at most one pair of orthogonally adjacent shaded cells is allowed in the entire grid"
-    R2: All unshaded cells must form a single connected group
-    R3: If a room contains a number N, exactly N cells in that room must be shaded
-    R4: Unnumbered rooms may contain any number of shaded cells
-    R5: A straight line of consecutive white cells cannot pass through 3 or more rooms
-  custom_rules:
-    R6:
-      text: "No consecutive same-room shading -- after shading a cell in a room, your next shade action must be in a different room"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Row shade balance -- no single row can have more than ceil(cols/2) shaded cells"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it (black)"
-    - "Right-click a cell to mark it white (dot)"
-
-heyawake2:
-  name: Heyawake 2
-  base_type: heyawake
-  interaction: cell_shading
-  standard_rules:
-    R1: "No adjacent shading (strict) -- zero orthogonally adjacent shaded cell pairs allowed"
-    R2: All unshaded cells must form a single connected group
-    R3: If a room contains a number N, exactly N cells in that room must be shaded
-    R4: Unnumbered rooms may contain any number of shaded cells
-    R5: A straight line of consecutive white cells cannot pass through 3 or more rooms
-  custom_rules:
-    R6:
-      text: "Half-grid alternation -- alternate between shading cells in the left half and right half of the grid"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Column shade balance -- no single column can have more than ceil(rows/2) shaded cells"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Shading density 10-50% -- total shaded cells must be at least 10% and at most 50% of grid area"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it (black)"
-    - "Right-click a cell to mark it white (dot)"
-
-mines:
-  name: Minesweeper
-  base_type: mines
-  interaction: cell_reveal
-  standard_rules:
-    R1: All cells start hidden
-    R2: Left-click to reveal a cell. Numbers show adjacent mine count. Zero-adjacent cells auto-reveal neighbors
-    R3: Right-click to flag a suspected mine
-    R4: Revealing a mine ends the game
-    R5: Reveal every non-mine cell to win
-  custom_rules:
-    R6:
-      text: "No consecutive same-row reveals -- after revealing a cell, your next reveal must be in a different row. Deadlock bypass: if all remaining hidden safe cells are in the same row, same-row reveals are allowed"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "No 2x2 mine block -- no 2x2 square of cells can all be mines"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Mine density <= 25% -- total mines must not exceed 25% of grid area"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a hidden cell to reveal it"
-    - "Right-click a hidden cell to toggle a flag"
-
-mines2:
-  name: Minesweeper 2
-  base_type: mines
-  interaction: cell_reveal
-  standard_rules:
-    R1: All cells start hidden
-    R2: Left-click to reveal a cell. Numbers show adjacent mine count. Zero-adjacent cells auto-reveal neighbors
-    R3: Right-click to flag a suspected mine
-    R4: Revealing a mine ends the game
-    R5: Reveal every non-mine cell to win
-  custom_rules:
-    R6:
-      text: "Lucky streak -- every 3rd consecutive safe cell you reveal triggers a bonus auto-reveal of one random hidden safe cell"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Row mine cap -- no single row can have more than ceil(2*cols/3) mines"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "No 2x2 mine block -- no 2x2 square of cells can all be mines"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a hidden cell to reveal it"
-    - "Right-click a hidden cell to toggle a flag"
-
-country:
-  name: Country Road
-  base_type: country
-  interaction: line_drawing
-  standard_rules:
-    R1: Draw a single closed loop with no branching or crossing
-    R2: The loop enters and exits each room exactly once
-    R3: If a room contains a number N, exactly N cells in that room must be on the loop
-    R4: The loop must pass through every room
-    R5: Two cells on opposite sides of a room boundary cannot both be off the loop
-  custom_rules:
-    R6:
-      text: "No consecutive same-room lines -- after drawing a line in a room, your next line must start in a different room"
-      type: move_ordering
-      check: runtime
-    R7:
-      text: "Minimum loop coverage -- at least 50% of all grid cells must be on the loop"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "At most 1 empty row -- at most one row may have zero cells on the loop"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click and drag between adjacent cells to draw a line segment"
-    - "Right-click a cell or border to mark it as not on the loop"
-
-country2:
-  name: Country Road 2
-  base_type: country
-  interaction: line_drawing
-  standard_rules:
-    R1: Draw a single closed loop with no branching or crossing
-    R2: The loop enters and exits each room exactly once
-    R3: If a room contains a number N, exactly N cells in that room must be on the loop
-    R4: The loop must pass through every room
-    R5: Two cells on opposite sides of a room boundary cannot both be off the loop
-  custom_rules:
-    R6:
-      text: "Turn balance -- total turns (corners) in the loop must not exceed twice the number of straight segments"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Maximum loop coverage -- at most 85% of all grid cells may be on the loop"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "At most 1 empty row -- at most one row may have zero cells on the loop"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click and drag between adjacent cells to draw a line segment"
-    - "Right-click a cell or border to mark it as not on the loop"
-
-hitori:
-  name: Hitori
-  base_type: hitori
-  interaction: cell_shading
-  standard_rules:
-    R1: No two orthogonally adjacent cells may both be shaded
-    R2: No duplicate numbers in any row among unshaded cells
-    R3: No duplicate numbers in any column among unshaded cells
-    R4: All unshaded cells must form a single connected group
-    R5: Pre-filled numbers cannot be removed, only shaded
-  custom_rules:
-    R6:
-      text: "No diagonal shading -- no two diagonally adjacent cells may both be shaded"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Checkerboard parity -- shaded cells must be on even-parity positions (row + column is even, 0-indexed)"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Shade limit per line -- no row or column may contain more than 2 shaded cells"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as unshaded"
-
-lits:
-  name: LITS
-  base_type: lits
-  interaction: cell_shading
-  standard_rules:
-    R1: Shade exactly 4 cells in each region to form a contiguous tetromino (all 4 shaded cells must be connected within the region)
-    R2: No two adjacent regions may have the same tetromino shape
-    R3: All shaded cells must form a single connected group across the entire grid
-    R4: No 2x2 square may be entirely shaded
-    R5: Each region contains exactly one tetromino
+    R1: Shade or leave cells unshaded
+    R2: Each unshaded cell has a "depth" equal to its BFS distance (through unshaded cells) to the nearest grid-border cell
+    R3: Border cells that are unshaded have depth 0
+    R4: Clue cells show exact depths and cannot be shaded
+    R5: All unshaded cells must form a single connected group
+    R6: No 2x2 square may be entirely shaded
   custom_rules: {}
   controls:
     - "Left-click a cell to shade it"
     - "Right-click a cell to mark it as unshaded"
 
-lits2:
-  name: LITS 2 (Triomino)
-  base_type: lits
-  interaction: cell_shading
+paritypipes:
+  name: Parity Pipes
+  base_type: paritypipes
+  interaction: edge_drawing
   standard_rules:
-    R1: Shade exactly 3 cells in each region to form a contiguous triomino (all 3 shaded cells must be connected within the region)
-    R2: All shaded cells must form a single connected group across the entire grid
-    R3: No 2x2 square may be entirely shaded
-    R4: Each region contains exactly one triomino
-    R5: All shaded cells in a room must belong to one contiguous block (no split shading within a room)
-  custom_rules:
-    R6:
-      text: "Same-shape adjacency allowed -- unlike standard LITS, adjacent regions MAY have the same triomino shape (this rule from base LITS is removed)"
-      type: solution_constraint
-      check: check_answer
+    R1: Draw closed loops on grid edges
+    R2: Every vertex is pre-colored black (B) or white (W)
+    R3: "Black vertex: the loop passes through it (exactly 2 drawn edges)"
+    R4: "White vertex: the loop does not pass through it (exactly 0 drawn edges)"
+    R5: All drawn edges form disjoint simple closed loops
+  custom_rules: {}
   controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as unshaded"
-
-yajilin:
-  name: Yajilin
-  base_type: yajilin
-  interaction: line_and_shading
-  standard_rules:
-    R1: Draw a single closed loop through cells (no branching/crossing)
-    R2: Shade some cells (not on the loop)
-    R3: No two shaded cells may be orthogonally adjacent
-    R4: Arrow clues indicate the number of shaded cells in that direction
-    R5: Clue cells are neither shaded nor on the loop
-  custom_rules:
-    R6:
-      text: "No diagonal shading -- no two diagonally adjacent cells may both be shaded"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Max shaded per row/column -- no row or column may contain more than the configured maximum number of shaded cells"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Shaded outside only -- shaded cells cannot be placed inside the loop (only outside the loop region)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click and drag between cells to draw loop segments"
-    - "Right-click a cell to shade it"
-
-yajilin2:
-  name: Yajilin 2
-  base_type: yajilin
-  interaction: line_and_shading
-  standard_rules:
-    R1: Draw a single closed loop through cells (no branching/crossing)
-    R2: Shade some cells (not on the loop)
-    R3: No two shaded cells may be orthogonally adjacent
-    R4: Arrow clues indicate the number of shaded cells in that direction
-    R5: Clue cells are neither shaded nor on the loop
-  custom_rules:
-    R6:
-      text: "Shaded cells must be on the grid border (edge row or column)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click and drag between cells to draw loop segments"
-    - "Right-click a cell to shade it"
-
-lightup:
-  name: Light Up (Akari)
-  base_type: lightup
-  interaction: bulb_placement
-  standard_rules:
-    R1: Place light bulbs in empty cells to illuminate the grid
-    R2: Numbered wall cells indicate exactly how many adjacent bulbs they have
-    R3: Every empty (non-wall) cell must be illuminated
-    R4: Walls block illumination
-    R5: Clue cells (walls with numbers) cannot have bulbs placed on them
-  custom_rules:
-    R6:
-      text: "3x3 box illumination -- bulbs illuminate only the 3x3 box of cells centered on themselves (8 surrounding cells), not the entire row/column as in standard Light Up"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "No line-of-sight blocking -- since illumination is local (3x3 box), two bulbs can coexist in the same row/column as long as they are not within each other's 3x3 range"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click an empty cell to place a bulb"
-    - "Right-click to mark a cell as no-bulb"
-
-lightup2:
-  name: Light Up 2 (Diagonal)
-  base_type: lightup
-  interaction: bulb_placement
-  standard_rules:
-    R1: Place light bulbs in empty cells
-    R2: "Bulbs illuminate along 4 diagonal rays (NE, NW, SE, SW) until blocked by a wall or grid edge"
-    R3: Every empty cell must be illuminated by at least one diagonal ray
-    R4: Clue cells cannot have bulbs placed on them
-    R5: Walls remain fixed and block diagonal rays
-  custom_rules:
-    R6:
-      text: "Diagonal wall counting -- numbered wall cells count bulbs among their 4 diagonal neighbours (not orthogonal as in standard Light Up)"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "No orthogonal adjacency -- no two bulbs may be orthogonally adjacent (up/down/left/right)"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Line-of-sight removed -- bulbs do NOT block each other along diagonal rays (unlike standard Light Up where bulbs block along orthogonal rays)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click an empty cell to place a bulb"
-    - "Right-click to mark a cell as no-bulb"
-
-tapa:
-  name: Tapa
-  base_type: tapa
-  interaction: cell_shading
-  standard_rules:
-    R1: Shade cells to form a connected wall
-    R2: Clue cells show the lengths of consecutive shaded blocks in the 8 surrounding cells
-    R3: Clue cells cannot be shaded
-    R4: All shaded cells must form a single connected group
-    R5: No 2x2 square may be entirely shaded
-  custom_rules:
-    R6:
-      text: "No 2x2 unshaded block -- no 2x2 square of cells may all be unshaded (excluding clue cells)"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Shade majority per row -- every row must have strictly more shaded cells than unshaded non-clue cells"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as unshaded"
-
-tapa2:
-  name: Tapa 2 (Column Majority)
-  base_type: tapa
-  interaction: cell_shading
-  standard_rules:
-    R1: Shade cells according to clue numbers (lengths of consecutive shaded blocks around clue)
-    R2: No 2x2 square may be entirely shaded
-    R3: All shaded cells must be connected
-    R4: Clue cells cannot be shaded
-    R5: Each column must have more shaded cells than unshaded non-clue cells
-  custom_rules:
-    R6:
-      text: "No 2x2 unshaded block -- no 2x2 square of cells may all be unshaded (excluding clue cells)"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Shade majority per row -- every row must have strictly more shaded cells than unshaded non-clue cells"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as unshaded"
-
-nurikabe:
-  name: Nurikabe
-  base_type: nurikabe
-  interaction: cell_shading
-  standard_rules:
-    R1: Each numbered cell is part of an island (connected white region)
-    R2: Each island contains exactly one number, indicating its size
-    R3: All shaded (sea) cells must form a single connected group
-    R4: No 2x2 square may be entirely shaded
-    R5: Every non-island cell is shaded
-  custom_rules:
-    R6:
-      text: "Shaded group size limit -- every connected group of shaded cells must contain at most 3 cells"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Straight-line islands -- every island (connected white region) must form a straight line (all cells in one row or one column)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as island (white)"
-
-nurikabe2:
-  name: Nurikabe 2 (Domino)
-  base_type: nurikabe
-  interaction: cell_shading
-  standard_rules:
-    R1: Each numbered cell is part of an island
-    R2: Each island contains exactly one number, indicating its size
-    R3: Every non-island cell is shaded
-    R4: Numbers cannot be shaded
-    R5: Each island must have the correct number of cells as indicated by its number
-  custom_rules:
-    R6:
-      text: "No 2x2 unshaded block -- no 2x2 square of cells may all be unshaded"
-      type: solution_constraint
-      check: check_answer
-    R7:
-      text: "Shaded dominoes -- every connected group of shaded cells must be exactly 2 cells (a domino)"
-      type: solution_constraint
-      check: check_answer
-    R8:
-      text: "Connected-shade removed -- shaded cells do NOT need to form a single connected group (unlike standard Nurikabe)"
-      type: solution_constraint
-      check: check_answer
-  controls:
-    - "Left-click a cell to shade it"
-    - "Right-click a cell to mark it as island (white)"
+    - "Left-click an edge to draw/toggle a line segment"
+    - "Right-click an edge to mark it as no-line (X)"
 
 radiance:
   name: Radiance
@@ -492,6 +58,35 @@ radiance:
     - "Beam path updates in real-time as you place mirrors"
     - "Green beam = reached target; Red beam = missed target"
 
+gradientwalls:
+  name: Gradient Walls
+  base_type: gradientwalls
+  interaction: number_entry
+  standard_rules:
+    R1: Fill every empty cell with a number from 1 to N (where N is the maximum of rows and columns)
+    R2: If a thick wall (border) exists between two adjacent cells, their values must differ by more than 1
+    R3: If no wall exists between two adjacent cells, their values must differ by at most 1
+    R4: Some cells contain pre-filled clue numbers that cannot be changed
+  custom_rules: {}
+  controls:
+    - "Click a cell, then type a digit to place it"
+    - "Left-click to cycle through values"
+
+kageboshi:
+  name: Kageboshi
+  base_type: kageboshi
+  interaction: cell_shading
+  standard_rules:
+    R1: Shade some cells on the board
+    R2: Each number indicates the total count of shaded cells in its row plus the total count of shaded cells in its column
+    R3: Cells with numbers cannot be shaded
+    R4: No two shaded cells may be orthogonally adjacent
+    R5: All unshaded cells must form a single orthogonally connected group
+  custom_rules: {}
+  controls:
+    - "Left-click a cell to shade it"
+    - "Right-click a cell to mark it as unshaded"
+
 resonance:
   name: Resonance
   base_type: resonance
@@ -521,17 +116,17 @@ resonance:
     - "Clue cells (numbered) cannot be modified"
     - "Green background = clue satisfied; Red background = clue violated"
 
-noribridge:
-  name: Nori Bridge
-  base_type: noribridge
-  interaction: bridge_placement
+pairloop:
+  name: Pairloop
+  base_type: pairloop
+  interaction: edge_drawing
   standard_rules:
-    R1: Place bridges on border segments between adjacent regions
-    R2: All regions must be connected via bridges
-    R3: Numbered regions must have exactly that many bridges
-    R4: At most 1 bridge per shared border between two regions
-    R5: Unnumbered regions may have any number of bridges
+    R1: Draw lines along the edges of some cells to form a single closed loop
+    R2: The loop cannot branch off or cross itself
+    R3: "Number clues (0-4): exactly that many of the cell's 4 borders are part of the loop"
+    R4: "Arrow clues: the cell's border in the arrow direction AND the adjacent cell's border in that same direction must both be loop segments (extended reach — 2 consecutive lines)"
+    R5: A cell contains either a number clue or an arrow clue, never both
   custom_rules: {}
   controls:
-    - "Left-click a border segment to place a bridge"
-    - "Right-click a border segment to mark it as no-bridge"
+    - "Left-click and drag between adjacent cells to draw a line segment"
+    - "Right-click a border to mark it as no-line (X)"

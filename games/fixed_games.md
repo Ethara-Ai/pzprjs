@@ -1,3 +1,5 @@
+> **HISTORICAL DOCUMENT** — This file documents fixes made to 20 game files that were subsequently REMOVED from the project during the May 2026 cleanup. All files, puzzle types, and solver modules referenced below no longer exist in the codebase. The current project has 7 active games (tidepool, paritypipes, radiance, gradientwalls, kageboshi, resonance, pairloop) — see `cspuz_solutions.md` for current state.
+
 # Fixed Games — ppbench Compliance Fixes
 
 **Last Updated**: April 24, 2026
@@ -580,3 +582,9 @@ Nori Bridge was the last remaining puzzle with `isUnique=false`. Previously used
 | nori_bridge.py | **True** | **True** | **True** |
 
 **Totals**: 60/60 True, 0/60 False, 0/60 None
+
+---
+
+## Post-Cleanup Note (May 2026)
+
+All 20 game files referenced in this document were removed during a comprehensive codebase cleanup. The corresponding solver modules (*2, *_custom variants) and pzprjs variety registrations were also removed. The project now contains 7 active games with 21 puzzles, all solver-verified unique. See `cspuz_solutions.md` for the current state.

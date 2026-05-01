@@ -7,7 +7,7 @@
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["yajilin", "yajilin-regions", "koburin", "lixloop", "retsurin", "yajilin2"], {
+})(["yajilin", "yajilin-regions", "koburin", "lixloop", "retsurin"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -65,7 +65,7 @@
 			this.mousereset();
 		}
 	},
-	"MouseEvent@yajilin,lixloop,yajilin2": {
+	"MouseEvent@yajilin,lixloop": {
 		inputModes: {
 			edit: ["number", "direc", "clear", "info-line"],
 			play: ["line", "peke", "shade", "unshade", "info-line", "completion"]
@@ -175,7 +175,7 @@
 			}
 		}
 	},
-	"Cell@yajilin,koburin,lixloop,retsurin,yajilin2": {
+	"Cell@yajilin,koburin,lixloop,retsurin": {
 		minnum: 0,
 		maxnum: function() {
 			return Math.max(this.board.cols, this.board.rows) >> 1;
@@ -410,7 +410,7 @@
 			}
 		}
 	},
-	"Border@yajilin,koburin,lixloop,retsurin,yajilin2": {
+	"Border@yajilin,koburin,lixloop,retsurin": {
 		isBorder: function() {
 			return (this.sidecell[0].qnum === -1) !== (this.sidecell[1].qnum === -1);
 		}
@@ -450,7 +450,7 @@
 			this.common.rebuildInfo.call(this);
 		}
 	},
-	"Board@yajilin,lixloop,retsurin,yajilin2": {
+	"Board@yajilin,lixloop,retsurin": {
 		redrawAffected: function(cells) {
 			var minx = this.maxbx,
 				maxx = this.minbx,
@@ -564,7 +564,7 @@
 			this.drawTarget();
 		}
 	},
-	"Graphic@yajilin,koburin,lixloop,retsurin,yajilin2": {
+	"Graphic@yajilin,koburin,lixloop,retsurin": {
 		getBGCellColor: function(cell) {
 			var info = cell.error || cell.qinfo;
 			if (this.puzzle.getConfig("disptype_yajilin") === 2 && cell.qnum !== -1) {
@@ -621,7 +621,7 @@
 
 	//---------------------------------------------------------
 	// URLエンコード/デコード処理
-	"Encode@yajilin,lixloop,yajilin2": {
+	"Encode@yajilin,lixloop": {
 		decodePzpr: function(type) {
 			this.decodeArrowNumber16();
 
@@ -741,7 +741,7 @@
 		}
 	},
 	//---------------------------------------------------------
-	"FileIO@yajilin,lixloop,yajilin2": {
+	"FileIO@yajilin,lixloop": {
 		decodeData: function() {
 			this.decodeConfigFlag("o", "yajilin_out");
 			this.decodeConfigFlag("d", "yajilin_diagonal");

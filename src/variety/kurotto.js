@@ -72,7 +72,7 @@ var MINES_NUM_COLORS = [
 	} else {
 		pzpr.classmgr.makeCustom(pidlist, classbase);
 	}
-})(["kurotto", "mines", "island", "mines2"], {
+})(["kurotto", "mines", "island"], {
 	//---------------------------------------------------------
 	// マウス入力系
 	MouseEvent: {
@@ -168,67 +168,6 @@ var MINES_NUM_COLORS = [
 		this.mousereset();
 	}
 	},
-	"MouseEvent@mines2": {
-		inputModes: { edit: ["number", "clear"], play: [] },
-		mouseinput_auto: function() {
-			if (this.puzzle.editmode) {
-				if (this.mousestart) { this.inputqnum(); }
-				return;
-			}
-			if (!this.mousestart) { return; }
-			var bd = this.board;
-			if (bd._minesGameOver || bd._minesWon) { return; }
-
-			var cell = this.getcell();
-			if (cell.isnull) { return; }
-
-			if (this.btn === "left") {
-				if (mines_isFlagged(cell) || mines_isRevealed(cell)) {
-					this.mousereset();
-					return;
-				}
-				if (mines_isMine(cell)) {
-					cell.setQans(1);
-					cell.seterr(1);
-					mines_revealAllMines(bd);
-					bd._minesGameOver = true;
-					bd._minesStreak = 0;
-					this.puzzle.redraw();
-					this.mousereset();
-					return;
-				}
-				mines_floodReveal(bd, cell);
-				bd._minesStreak = (bd._minesStreak || 0) + 1;
-
-				if (bd._minesStreak % 3 === 0) {
-					var hidden = [];
-					for (var i = 0; i < bd.cell.length; i++) {
-						var nb = bd.cell[i];
-						if (!nb.isnull && !mines_isMine(nb) && !mines_isRevealed(nb) && !mines_isFlagged(nb)) {
-							hidden.push(nb);
-						}
-					}
-					if (hidden.length > 0) {
-						var lucky = hidden[(bd._minesStreak * 7 + bd.cols) % hidden.length];
-						mines_floodReveal(bd, lucky);
-					}
-				}
-
-				if (mines_checkWin(bd)) {
-					bd._minesWon = true;
-				}
-				this.puzzle.redraw();
-			} else if (this.btn === "right") {
-				if (mines_isRevealed(cell)) {
-					this.mousereset();
-					return;
-				}
-				cell.setQsub(mines_isFlagged(cell) ? 0 : 1);
-				cell.draw();
-			}
-			this.mousereset();
-		}
-	},
 	"MouseEvent@island": {
 		inputModes: {
 			edit: ["number", "clear"],
@@ -283,14 +222,6 @@ var MINES_NUM_COLORS = [
 			this._minesGameOver = false;
 			this._minesWon = false;
 			this._lastRevealRow = -1;
-		}
-	},
-	"Board@mines2": {
-		initBoardSize: function(col, row) {
-			this.common.initBoardSize.call(this, col, row);
-			this._minesGameOver = false;
-			this._minesWon = false;
-			this._minesStreak = 0;
 		}
 	},
 	"Cell@kurotto,island": {
@@ -666,190 +597,6 @@ var MINES_NUM_COLORS = [
 			if (this.checkOnly) { return; }
 			for (var j = 0; j < total; j++) {
 				if (mines_isMine(bd.cell[j])) { bd.cell[j].seterr(1); }
-			}
-		}
-	},
-	"Graphic@mines2": {
-		paint: function() {
-			this.drawMinesHiddenCells();
-			this.drawMinesRevealedNumbers();
-			this.drawMinesMines();
-			this.drawMinesFlags();
-			this.drawGrid();
-			this.drawChassis();
-			this.drawTarget();
-			this.drawStreakCounter();
-		},
-
-		drawMinesHiddenCells: function() {
-			var bd = this.board;
-			var g = this.vinc("m2_hidden", "crispEdges", true);
-			var bw = this.bw, bh = this.bh;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				g.vid = "m2h_" + cell.id;
-				if (!mines_isRevealed(cell)) {
-					g.fillStyle = mines_isFlagged(cell) ? "#999999" : "#BBBBBB";
-					g.fillRectCenter(cell.bx * bw, cell.by * bh, bw + 0.5, bh + 0.5);
-					g.strokeStyle = "#DDDDDD";
-					g.lineWidth = 1;
-					g.strokeRect(
-						cell.bx * bw - bw / 2 + 0.5,
-						cell.by * bh - bh / 2 + 0.5,
-						bw - 1, bh - 1
-					);
-				} else {
-					g.vhide();
-				}
-			}
-		},
-
-		drawMinesRevealedNumbers: function() {
-			var bd = this.board;
-			var g = this.vinc("m2_nums", "auto");
-			var bw = this.bw, bh = this.bh;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				g.vid = "m2n_" + cell.id;
-				if (mines_isRevealed(cell) && !mines_isMine(cell) && cell.qnum > 0) {
-					var color = MINES_NUM_COLORS[cell.qnum] || "#000000";
-					this.disptext("" + cell.qnum, cell.bx * bw, cell.by * bh, {
-						ratio: 0.65,
-						color: color
-					});
-				} else {
-					g.vhide();
-				}
-			}
-		},
-
-		drawMinesMines: function() {
-			var bd = this.board;
-			var g = this.vinc("m2_mines", "auto");
-			var bw = this.bw, bh = this.bh;
-			var mrad = Math.max(bw * 0.25, 3);
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				g.vid = "m2m_bg_" + cell.id;
-				if (mines_isRevealed(cell) && mines_isMine(cell)) {
-					if (cell.error === 1) {
-						g.fillStyle = "#FF4444";
-						g.fillRectCenter(cell.bx * bw, cell.by * bh, bw + 0.5, bh + 0.5);
-					} else {
-						g.vhide();
-					}
-					g.vid = "m2m_" + cell.id;
-					g.fillStyle = "#000000";
-					g.beginPath();
-					g.arc(cell.bx * bw, cell.by * bh, mrad, 0, Math.PI * 2, false);
-					g.fill();
-				} else {
-					g.vhide();
-					g.vid = "m2m_" + cell.id;
-					g.vhide();
-				}
-			}
-		},
-
-		drawMinesFlags: function() {
-			var bd = this.board;
-			var g = this.vinc("m2_flags", "auto");
-			var bw = this.bw, bh = this.bh;
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				g.vid = "m2f_" + cell.id;
-				if (!mines_isRevealed(cell) && mines_isFlagged(cell)) {
-					var cx = cell.bx * bw, cy = cell.by * bh;
-					var fh = bh * 0.6, fw = bw * 0.35;
-					g.fillStyle = "#CC0000";
-					g.beginPath();
-					g.moveTo(cx - fw * 0.3, cy - fh * 0.5);
-					g.lineTo(cx + fw * 0.5, cy - fh * 0.15);
-					g.lineTo(cx - fw * 0.3, cy + fh * 0.2);
-					g.closePath();
-					g.fill();
-					g.strokeStyle = "#000000";
-					g.lineWidth = Math.max(bw / 12, 1);
-					g.beginPath();
-					g.moveTo(cx - fw * 0.3, cy - fh * 0.5);
-					g.lineTo(cx - fw * 0.3, cy + fh * 0.5);
-					g.stroke();
-				} else {
-					g.vhide();
-				}
-			}
-		},
-
-		drawStreakCounter: function() {
-			var bd = this.board;
-			var streak = bd._minesStreak || 0;
-			var g = this.vinc("m2_streak", "auto");
-			g.vid = "m2streak_text";
-			if (streak > 0 && !bd._minesGameOver && !bd._minesWon) {
-				var bw = this.bw;
-				var nextBonus = 3 - (streak % 3);
-				var px = bw;
-				var py = this.bh * 0.4;
-				this.disptext("Streak:" + streak + " (bonus in " + nextBonus + ")", px, py, {
-					ratio: 0.2,
-					color: "#FF8800"
-				});
-			} else {
-				g.vhide();
-			}
-		}
-	},
-	"AnsCheck@mines2": {
-		checklist: ["checkMinesComplete", "checkRowMineCap", "checkNo2x2MineBlock"],
-
-		checkMinesComplete: function() {
-			var bd = this.board;
-			if (bd._minesGameOver) {
-				this.failcode.add("minesExploded");
-				return;
-			}
-			for (var c = 0; c < bd.cell.length; c++) {
-				var cell = bd.cell[c];
-				if (!mines_isMine(cell) && !mines_isRevealed(cell)) {
-					this.failcode.add("minesIncomplete");
-					return;
-				}
-			}
-		},
-		checkRowMineCap: function() {
-			var bd = this.board;
-			var cap = Math.ceil(2 * bd.cols / 3);
-			for (var r = 0; r < bd.rows; r++) {
-				var rowMines = 0;
-				for (var c = 0; c < bd.cols; c++) {
-					if (mines_isMine(bd.getc(c * 2 + 1, r * 2 + 1))) { rowMines++; }
-				}
-				if (rowMines > cap) {
-					this.failcode.add("minesRowTooMany");
-					if (this.checkOnly) { return; }
-					for (var c2 = 0; c2 < bd.cols; c2++) {
-						var cell = bd.getc(c2 * 2 + 1, r * 2 + 1);
-						if (mines_isMine(cell)) { cell.seterr(1); }
-					}
-					return;
-				}
-			}
-		},
-		checkNo2x2MineBlock: function() {
-			var bd = this.board;
-			for (var r = 0; r < bd.rows - 1; r++) {
-				for (var c = 0; c < bd.cols - 1; c++) {
-					var c00 = bd.getc(c * 2 + 1, r * 2 + 1);
-					var c01 = bd.getc(c * 2 + 3, r * 2 + 1);
-					var c10 = bd.getc(c * 2 + 1, r * 2 + 3);
-					var c11 = bd.getc(c * 2 + 3, r * 2 + 3);
-					if (mines_isMine(c00) && mines_isMine(c01) && mines_isMine(c10) && mines_isMine(c11)) {
-						this.failcode.add("mines2x2Block");
-						if (this.checkOnly) { return; }
-						c00.seterr(1); c01.seterr(1); c10.seterr(1); c11.seterr(1);
-						return;
-					}
-				}
 			}
 		}
 	}

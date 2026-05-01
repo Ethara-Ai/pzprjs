@@ -16,8 +16,7 @@
 		"remlen",
 		"nothing",
 		"dotchi2",
-		"wataridori",
-		"country2"
+		"wataridori"
 	];
 	if (typeof module === "object" && module.exports) {
 		module.exports = [pidlist, classbase];
@@ -27,7 +26,7 @@
 })({
 	//---------------------------------------------------------
 	// マウス入力系
-	"MouseEvent@country,onsen,detour,country2": {
+	"MouseEvent@country,onsen,detour": {
 		inputModes: {
 			edit: ["border", "number", "clear", "info-line"],
 			play: ["line", "peke", "subcircle", "subcross", "clear", "info-line"]
@@ -360,7 +359,7 @@
 
 	//---------------------------------------------------------
 	// 盤面管理系
-	"Cell@country,onsen,maxi,detour,country2": {
+	"Cell@country,onsen,maxi,detour": {
 		maxnum: function() {
 			return Math.min(999, this.room.clist.length);
 		}
@@ -382,7 +381,7 @@
 			}
 		}
 	},
-	"Cell@country,country2": {
+	"Cell@country": {
 		minnum: function() {
 			return this.puzzle.getConfig("country_empty") ? 0 : 1;
 		}
@@ -443,7 +442,7 @@
 	Board: {
 		hasborder: 1
 	},
-	"Board@country,country2": {
+	"Board@country": {
 		initBoardSize: function(col, row) {
 			this.common.initBoardSize.call(this, col, row);
 			this.puzzle._lastLineRoom = null;
@@ -453,13 +452,6 @@
 		customRules: [
 			"No consecutive same-room lines \u2014 after drawing a line in a room, your next line must start in a different room.",
 			"Minimum loop coverage \u2014 at least 50% of all grid cells must be on the loop.",
-			"At most 1 empty row \u2014 at most one row may have zero cells on the loop."
-		]
-	},
-	"Board@country2#rules": {
-		customRules: [
-			"Turn balance \u2014 the total number of turns (corners) in the loop must not exceed twice the number of straight segments.",
-			"Maximum loop coverage \u2014 at most 85% of all grid cells may be on the loop.",
 			"At most 1 empty row \u2014 at most one row may have zero cells on the loop."
 		]
 	},
@@ -540,7 +532,7 @@
 	AreaRoomGraph: {
 		enabled: true
 	},
-	"AreaRoomGraph@country,maxi,detour,remlen,country2": {
+	"AreaRoomGraph@country,maxi,detour,remlen": {
 		hastop: true
 	},
 	"AreaRoomGraph@ovotovata": {
@@ -627,7 +619,7 @@
 				this.drawBGCells();
 			}
 
-			if (this.pid === "country" || this.pid === "country2") {
+			if (this.pid === "country") {
 				this.drawGrid();
 			} else {
 				this.drawDashedGrid();
@@ -640,7 +632,6 @@
 			}
 			if (
 				this.pid === "country" ||
-				this.pid === "country2" ||
 				this.pid === "maxi" ||
 				this.pid === "detour" ||
 				this.pid === "ovotovata" ||
@@ -832,7 +823,7 @@
 	// URLエンコード/デコード処理
 	Encode: {
 		decodePzpr: function(type) {
-			if (this.pid === "country" || this.pid === "country2") {
+			if (this.pid === "country") {
 				this.puzzle.setConfig("country_empty", this.checkpflag("e"));
 			}
 			if (this.pid === "ovotovata" || this.pid === "wataridori") {
@@ -850,7 +841,6 @@
 			}
 			if (
 				this.pid === "country" ||
-				this.pid === "country2" ||
 				this.pid === "maxi" ||
 				this.pid === "detour" ||
 				this.pid === "ovotovata" ||
@@ -874,7 +864,7 @@
 			}
 		},
 		encodePzpr: function(type) {
-			if (this.pid === "country" || this.pid === "country2") {
+			if (this.pid === "country") {
 				this.outpflag = this.puzzle.getConfig("country_empty") ? "e" : null;
 			}
 			if (this.pid === "ovotovata" || this.pid === "wataridori") {
@@ -888,7 +878,6 @@
 			}
 			if (
 				this.pid === "country" ||
-				this.pid === "country2" ||
 				this.pid === "maxi" ||
 				this.pid === "detour" ||
 				this.pid === "ovotovata" ||
@@ -949,7 +938,7 @@
 	//---------------------------------------------------------
 	FileIO: {
 		decodeData: function() {
-			if ((this.pid === "country" || this.pid === "country2") && this.filever >= 1) {
+			if (this.pid === "country" && this.filever >= 1) {
 				this.decodeFlags();
 			}
 			if (this.pid === "ovotovata" || this.pid === "wataridori") {
@@ -985,7 +974,7 @@
 			}
 		},
 		encodeData: function() {
-			if (this.pid === "country" || this.pid === "country2") {
+			if (this.pid === "country") {
 				this.encodeFlags(["country_empty"]);
 			}
 			if (this.pid === "ovotovata" || this.pid === "wataridori") {
@@ -1419,134 +1408,6 @@
 			}
 			for (var j = 0; j < total; j++) {
 				if (bd.cell[j].lcnt === 0) {
-					bd.cell[j].seterr(1);
-				}
-			}
-		},
-		checkMaxEmptyRows: function() {
-			var bd = this.board;
-			var emptyRows = 0;
-			for (var r = 0; r < bd.rows; r++) {
-				var hasLoop = false;
-				for (var c = 0; c < bd.cols; c++) {
-					if (bd.getc(c * 2 + 1, r * 2 + 1).lcnt > 0) {
-						hasLoop = true;
-						break;
-					}
-				}
-				if (!hasLoop) {
-					emptyRows++;
-				}
-			}
-			if (emptyRows <= 1) {
-				return;
-			}
-			this.failcode.add("lnTooManyEmptyRows");
-			if (this.checkOnly) {
-				return;
-			}
-			for (var r2 = 0; r2 < bd.rows; r2++) {
-				var rowHasLoop = false;
-				for (var c2 = 0; c2 < bd.cols; c2++) {
-					if (bd.getc(c2 * 2 + 1, r2 * 2 + 1).lcnt > 0) {
-						rowHasLoop = true;
-						break;
-					}
-				}
-				if (!rowHasLoop) {
-					for (var c3 = 0; c3 < bd.cols; c3++) {
-						bd.getc(c3 * 2 + 1, r2 * 2 + 1).seterr(1);
-					}
-				}
-			}
-		}
-	},
-	"AnsCheck@country2#1": {
-		checklist: [
-			"checkBranchLine",
-			"checkCrossLine",
-
-			"checkRoomPassOnce",
-
-			"checkRoadCount",
-			"checkNoRoadCountry",
-			"checkSideAreaGrass",
-
-			"checkStraightVsTurns",
-			"checkMaxLoopCoverage",
-			"checkMaxEmptyRows",
-
-			"checkDeadendLine+",
-			"checkOneLoop"
-		]
-	},
-	"AnsCheck@country2": {
-		checkRoadCount: function() {
-			this.checkLinesInArea(
-				this.board.roommgr,
-				function(w, h, a, n) {
-					return n <= 0 || n === a;
-				},
-				"bkLineNe"
-			);
-		},
-		checkSideAreaGrass: function() {
-			this.checkSideAreaCell(
-				function(cell1, cell2) {
-					return cell1.lcnt === 0 && cell2.lcnt === 0;
-				},
-				false,
-				"cbNoLine"
-			);
-		},
-		checkStraightVsTurns: function() {
-			var bd = this.board;
-			var straightCount = 0;
-			var turnCount = 0;
-			for (var i = 0; i < bd.cell.length; i++) {
-				var cell = bd.cell[i];
-				if (cell.lcnt !== 2) {
-					continue;
-				}
-				if (cell.isLineStraight()) {
-					straightCount++;
-				} else {
-					turnCount++;
-				}
-			}
-			if (turnCount <= straightCount * 2) {
-				return;
-			}
-			this.failcode.add("lnTooManyTurns");
-			if (this.checkOnly) {
-				return;
-			}
-			for (var j = 0; j < bd.cell.length; j++) {
-				var cell2 = bd.cell[j];
-				if (cell2.lcnt === 2 && cell2.isLineCurve()) {
-					cell2.seterr(1);
-				}
-			}
-		},
-		checkMaxLoopCoverage: function() {
-			var bd = this.board;
-			var total = bd.cell.length;
-			var onLoop = 0;
-			for (var i = 0; i < total; i++) {
-				if (bd.cell[i].lcnt > 0) {
-					onLoop++;
-				}
-			}
-			var cap = Math.ceil(total * 0.85);
-			if (onLoop <= cap) {
-				return;
-			}
-			this.failcode.add("lnTooManyOnLoop");
-			if (this.checkOnly) {
-				return;
-			}
-			for (var j = 0; j < total; j++) {
-				if (bd.cell[j].lcnt > 0) {
 					bd.cell[j].seterr(1);
 				}
 			}
