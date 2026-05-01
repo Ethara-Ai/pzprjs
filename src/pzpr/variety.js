@@ -160,6 +160,7 @@
 			dotchi2: [0, 0, "ドッチドッチループ", "Dotchi Dotchi Loop", "country"],
 			doubleback: [0, 0, "Double Back", "Double Back", "country"],
 			easyasabc: [0, 0, "ABCプレース", "Easy as ABC"],
+			ecliptic: [0, 0, "エクリプティック", "Ecliptic"],
 			edamame: [0, 0, "Edamame", "Edamame", "kaidan"],
 			energywalk: [0, 0, "Energy Walk", "Energy Walk", "icewalk"],
 			evolmino: [0, 0, "シンカミノ", "Evolmino"],

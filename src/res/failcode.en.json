@@ -519,6 +519,10 @@
   "cxNoLine": "A point is not visited.",
   "cxOverlap.diamond": "Two diamonds overlap.",
   "cxOverlap.heyapin": "A pin overlaps a single region.",
+  "ecColUnbal.ecliptic": "Columns have different numbers of shaded cells.",
+  "ecNeighborNe.ecliptic": "The number doesn't match the count of adjacent shaded cells.",
+  "ecRowColNe.ecliptic": "Row and column shaded counts don't match.",
+  "ecRowUnbal.ecliptic": "Rows have different numbers of shaded cells.",
   "exMinusNe.magnets": "The number of Minus signs in the row or column is not correct.",
   "exNoMatch.nonogram": "The shaded cells don't match the clues in the row or column.",
   "exPlusNe.magnets": "The number of Plus signs in the row or column is not correct.",
@@ -992,5 +996,9 @@
   "gwOpenFar.gradientwalls": "No wall exists between cells whose values differ by more than 1.",
   "ceEmpty.gradientwalls": "A cell is not filled in.",
   "kgCountGt.kageboshi": "The number is smaller than the count of shaded cells in its row and column.",
-  "kgCountLt.kageboshi": "The number is larger than the count of shaded cells in its row and column."
+  "kgCountLt.kageboshi": "The number is larger than the count of shaded cells in its row and column.",
+  "emAdj.resonance": "Two emitters are orthogonally adjacent.",
+  "emRegion.resonance": "A region contains more than one emitter.",
+  "sigOver.resonance": "A clue cell receives more signal than its number.",
+  "sigUnder.resonance": "A clue cell does not receive exactly the signal indicated by its number."
 }
