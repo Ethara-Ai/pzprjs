@@ -998,5 +998,10 @@
   "brDegreeUnder.noribridge": "Too few bridges for the numbered region.",
   "brDisconnected.noribridge": "Not all regions are connected via bridges.",
   "ppVertexParity.paritypipes": "The vertex does not match its color (black=loop passes, white=loop skips).",
-  "tpDepthNe.tidepool": "The clue number does not match the cell's BFS distance to the border."
+  "tpDepthNe.tidepool": "The clue number does not match the cell's BFS distance to the border.",
+  "gwWallClose.gradientwalls": "A wall exists between cells whose values differ by at most 1.",
+  "gwOpenFar.gradientwalls": "No wall exists between cells whose values differ by more than 1.",
+  "ceEmpty.gradientwalls": "A cell is not filled in.",
+  "kgCountGt.kageboshi": "The number is smaller than the count of shaded cells in its row and column.",
+  "kgCountLt.kageboshi": "The number is larger than the count of shaded cells in its row and column."
 }
